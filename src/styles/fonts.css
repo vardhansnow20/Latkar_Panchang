@@ -1,0 +1,40 @@
+/**
+ * Self-hosted @font-face declarations — currently inactive.
+ *
+ * tokens.css already points --font-display/--font-body/--font-devanagari
+ * at safe system-font stacks, so the site renders correctly with this
+ * file empty. Uncomment a block below once the corresponding files
+ * exist in public/fonts/ (see public/fonts/README.md), then add the
+ * family name to the front of the matching stack in tokens.css.
+ */
+
+/*
+@font-face {
+  font-family: "Panchang Display";
+  src: url("/fonts/display/panchang-display-regular.woff2") format("woff2");
+  font-weight: 400 600;
+  font-style: normal;
+  font-display: swap;
+}
+*/
+
+/*
+@font-face {
+  font-family: "Panchang Sans";
+  src: url("/fonts/body/panchang-sans-regular.woff2") format("woff2");
+  font-weight: 400 600;
+  font-style: normal;
+  font-display: swap;
+}
+*/
+
+/*
+@font-face {
+  font-family: "Panchang Devanagari";
+  src: url("/fonts/devanagari/panchang-devanagari-regular.woff2") format("woff2");
+  font-weight: 400 600;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0900-097F;
+}
+*/

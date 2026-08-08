@@ -1,0 +1,164 @@
+/**
+ * Kolhapur Latkar Panchang — design tokens.
+ *
+ * Rebuilt from first principles. The organising idea is that a
+ * Panchang locates a moment against the sky, so the page is not a
+ * stack of panels with backgrounds: it is a single continuous
+ * sunrise, and content is *registered* against it at a given hour.
+ * Everything below serves that.
+ *
+ * Carried over from the previous system: the palette and the
+ * typefaces, which are brand identity. Everything structural —
+ * scale, rhythm, radius, depth — is new.
+ */
+
+@theme {
+  /* ---------------------------------------------------------------
+   * Palette. Unchanged hues, but their *roles* have changed: indigo
+   * is no longer an occasional section variant, it is the sky at the
+   * top of the page, and paper is the sky at the bottom. Ink is
+   * therefore not a constant — see the tone system further down.
+   * --------------------------------------------------------------- */
+  --color-paper: #f6f1e4;
+  --color-paper-raised: #fcfaf3;
+  --color-paper-sunk: #ede4cf;
+
+  --color-ink: #231b16;
+  --color-ink-muted: #6b5d4f;
+  --color-ink-faint: #9c8f80;
+
+  --color-maroon: #7b2d26;
+  --color-maroon-hover: #642119;
+  --color-maroon-ink: #fcfaf3;
+
+  --color-brass: #b08d57;
+  --color-brass-soft: #d9c9a3;
+
+  --color-indigo: #1f2a44;
+  --color-indigo-raised: #29365a;
+  --color-indigo-ink: #f6f1e4;
+
+  --color-line: #ded2b8;
+  --color-line-strong: #c9b896;
+
+  /* Two new stops the sunrise needs to pass through cleanly. Without
+   * them the gradient runs straight from navy to cream and goes
+   * visibly grey across the middle. */
+  --color-dawn: #4a4258;
+  --color-morning: #b9a189;
+
+  /* ---------------------------------------------------------------
+   * Typefaces — unchanged. The display serif carries the almanac
+   * voice, the mono is used far more heavily now: an instrument is
+   * covered in numbers, and numbers want a fixed advance.
+   * --------------------------------------------------------------- */
+  --font-display: "Panchang Display", "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  --font-body: "Panchang Sans", ui-sans-serif, "Segoe UI", -apple-system, "Helvetica Neue", Arial, sans-serif;
+  --font-devanagari: "Panchang Devanagari", "Tiro Devanagari Sanskrit", "Noto Serif Devanagari", serif;
+  --font-mono: ui-monospace, "Cascadia Mono", "SF Mono", Consolas, monospace;
+
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+
+  --tracking-tight: -0.018em;
+  --tracking-normal: 0em;
+  --tracking-wide: 0.05em;
+  --tracking-widest: 0.18em;
+
+  /* ---------------------------------------------------------------
+   * Type scale — named for what it does in an almanac rather than by
+   * abstract size, and deliberately far more extreme at the top end
+   * than the old scale, which never exceeded 88px. An epoch numeral
+   * is a structural element here, not a heading.
+   * --------------------------------------------------------------- */
+  --text-tick: 0.6875rem; /* 11px — degree marks, rule labels */
+  --text-tick--line-height: 1.4;
+  --text-tick--letter-spacing: var(--tracking-widest);
+
+  --text-note: 0.8125rem; /* 13px — captions, museum labels */
+  --text-note--line-height: 1.6;
+
+  --text-body: 1.0625rem; /* 17px — reading size */
+  --text-body--line-height: 1.72;
+
+  --text-lead: clamp(1.1875rem, 1.1rem + 0.4vw, 1.4375rem); /* 19–23px */
+  --text-lead--line-height: 1.55;
+
+  --text-title: clamp(1.625rem, 1.4rem + 1.1vw, 2.375rem); /* 26–38px */
+  --text-title--line-height: 1.24;
+
+  --text-chapter: clamp(2.5rem, 1.9rem + 3vw, 4.5rem); /* 40–72px */
+  --text-chapter--line-height: 1.02;
+  --text-chapter--letter-spacing: var(--tracking-tight);
+
+  --text-epoch: clamp(4.5rem, 2rem + 12vw, 13rem); /* 72–208px */
+  --text-epoch--line-height: 0.84;
+  --text-epoch--letter-spacing: -0.03em;
+
+  /* ---------------------------------------------------------------
+   * Radius — an instrument is machined, not rounded. One value, used
+   * only where a plate edge would actually be eased.
+   * --------------------------------------------------------------- */
+  --radius-edge: 2px;
+
+  /* ---------------------------------------------------------------
+   * Depth — no warm paper-lift shadows any more. Objects here sit in
+   * air against a sky, so shadows are large, soft, and cool, and
+   * there are only two: resting and raised.
+   * --------------------------------------------------------------- */
+  --depth-rest: 0 2px 6px rgba(20, 24, 40, 0.10), 0 18px 44px -20px rgba(20, 24, 40, 0.30);
+  --depth-lift: 0 6px 16px rgba(20, 24, 40, 0.14), 0 40px 90px -32px rgba(20, 24, 40, 0.42);
+
+  --breakpoint-sm: 30rem;
+  --breakpoint-md: 48rem;
+  --breakpoint-lg: 64rem;
+  --breakpoint-xl: 80rem;
+}
+
+/* -----------------------------------------------------------------
+ * Rhythm. A single fluid scale on a ~1.5 ratio, addressed through
+ * var() rather than generated utilities, so every gap on the page is
+ * traceable to one of eight numbers and nothing is ever a one-off
+ * pixel guess.
+ * ----------------------------------------------------------------- */
+:root {
+  --s-1: clamp(0.25rem, 0.24rem + 0.05vw, 0.375rem);
+  --s-2: clamp(0.5rem, 0.47rem + 0.15vw, 0.75rem);
+  --s-3: clamp(0.875rem, 0.8rem + 0.3vw, 1.25rem);
+  --s-4: clamp(1.375rem, 1.2rem + 0.7vw, 2rem);
+  --s-5: clamp(2.125rem, 1.8rem + 1.4vw, 3.25rem);
+  --s-6: clamp(3.25rem, 2.6rem + 2.6vw, 5.25rem);
+  --s-7: clamp(5rem, 3.8rem + 5vw, 8.5rem);
+  --s-8: clamp(7.5rem, 5.2rem + 9.5vw, 14rem);
+
+  /* The page's side margin, and the width the degree rule occupies
+   * inside it. Content never enters the rule's channel. */
+  --gutter: clamp(1.25rem, 0.9rem + 2.2vw, 3rem);
+  --rule-channel: clamp(2.25rem, 1.6rem + 3vw, 4.5rem);
+
+  /* Reading measures — set in characters, because a column's job is
+   * to be read, not to hit a pixel width. */
+  --measure-tight: 34ch;
+  --measure: 46ch;
+  --measure-wide: 62ch;
+
+  /* The page stops widening here; beyond it the sky takes the rest. */
+  --frame: 100rem;
+
+  /* ---------------------------------------------------------------
+   * Tone. Each register declares the hour it sits at, and these are
+   * the ink values that hour requires. Set by `.tone-*` in
+   * globals.css, consumed by every text element as var(--ink).
+   * --------------------------------------------------------------- */
+  --ink: var(--color-ink);
+  --ink-soft: var(--color-ink-muted);
+  --ink-faint: var(--color-ink-faint);
+  --hairline: var(--color-line);
+
+  /* Motion — one curve. Durations are longer than the old system's:
+   * this page is meant to be moved through slowly. */
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --t-quick: 200ms;
+  --t-reveal: 900ms;
+}

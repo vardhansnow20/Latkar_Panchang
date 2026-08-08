@@ -1,0 +1,425 @@
+@import "tailwindcss";
+@import "./fonts.css";
+@import "./tokens.css";
+
+/**
+ * The page is one sky.
+ *
+ * The previous build gave each section its own background and let
+ * them abut, which is what made the site read as a stack of panels.
+ * Here a single gradient spans the whole document — night at the
+ * origin, rising through dawn to full daylight at the present — and
+ * registers are transparent windows onto it. Nothing paints its own
+ * background. That one decision is what makes the scroll continuous.
+ *
+ * It is deliberately pure CSS, driven by document height rather than
+ * a scroll listener: the sunrise cannot stutter, cannot desync, and
+ * costs nothing on the main thread.
+ */
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    /* The sky must cover the viewport even when a short page doesn't
+       fill it, and must not repeat when a long one overruns. */
+    background-color: var(--color-indigo);
+  }
+
+  body {
+    min-height: 100%;
+    font-family: var(--font-body);
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+
+    /* The sunrise.
+     *
+     * The stop positions are not decorative — they are pinned to the
+     * page's own register boundaries. Night is held all the way to
+     * 33.6%, where the Meridian band begins; the crossing to daylight
+     * is completed by 36%, before the Meridian band ends. Every
+     * register that carries text therefore sits wholly on one side of
+     * the horizon, which is what keeps contrast passing throughout.
+     *
+     * If a register's height changes materially, re-measure and move
+     * these two stops with it. */
+    /* One complete celestial day, over one century of history.
+     *
+     * Midnight → dawn → morning → golden afternoon → sunset → evening
+     * → night again, so the journey closes where it opened.
+     *
+     * The stop positions are not decorative: they are pinned to the
+     * page's two wordless crossing bands. Night is held to 33.6%,
+     * where Meridian begins, and daylight is complete by 36%, before
+     * it ends. The return crossing sits inside Dusk on the same
+     * principle. Every register carrying text therefore sits wholly on
+     * one side of a horizon, which is what keeps contrast passing
+     * across the whole cycle.
+     *
+     * If a register's height changes materially, re-measure the band
+     * boundaries and move these stops with them. */
+    background-image: linear-gradient(
+      180deg,
+      #10162a 0%,
+      var(--color-indigo) 8%,
+      #262f4e 18%,
+      #33324f 28%,
+      /* sunrise — crosses inside the Meridian band (36.4–38.3%) */
+      #3d3a55 36.5%,
+      #776a76 37.3%,
+      var(--color-morning) 38.2%,
+      #cdb69a 46%,
+      #ded0b2 56%,
+      var(--color-paper-sunk) 68%,
+      var(--color-paper) 80%,
+      /* the afternoon warms, but stays light enough to carry dark ink
+         all the way to the edge of the Dusk band */
+      #f2e6cd 92.6%,
+      /* sunset — the whole crossing compressed inside Dusk
+         (92.7–94.3%), so no register with text ever sits in it */
+      #c98f80 93.3%,
+      #7d5a78 93.8%,
+      #2b3050 94.2%,
+      #1e2440 96%,
+      #10162a 100%
+    );
+    background-repeat: no-repeat;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    font-weight: var(--font-weight-medium);
+    color: var(--ink);
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  ::selection {
+    background-color: var(--color-brass);
+    color: var(--color-indigo);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-brass);
+    outline-offset: 4px;
+    border-radius: var(--radius-edge);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer utilities {
+  /* ---------------------------------------------------------------
+   * Tone. A register declares the hour it sits at and inherits the
+   * ink that hour can carry. This is the mechanism that lets one
+   * continuous sky hold legible text from navy through to cream —
+   * text colour is a function of position on the page, not a per-
+   * component decision.
+   * --------------------------------------------------------------- */
+  .tone-night {
+    --ink: #f2eee2;
+    --ink-soft: #b9b7c4;
+    --ink-faint: #7d7f92;
+    --hairline: rgba(242, 238, 226, 0.18);
+  }
+
+  .tone-dawn {
+    --ink: #f6f2e8;
+    --ink-soft: #ded5cd;
+    --ink-faint: #b3a79f;
+    --hairline: rgba(246, 242, 232, 0.22);
+  }
+
+  /* Morning sits on the warmest, mid-value part of the sky, so its
+     secondary ink has to run darker than a "muted" colour normally
+     would — measured against the gradient at this height, the softer
+     value this started at fell to 2.8:1 for body copy. */
+  .tone-morning {
+    --ink: #241c14;
+    --ink-soft: #3b2f24;
+    --ink-faint: #574636;
+    --hairline: rgba(36, 28, 20, 0.22);
+  }
+
+  /* Daylight now runs to the edge of the sunset rather than stopping
+     on flat paper, so its secondary ink is set darker than the shared
+     `--color-ink-muted`: against the warmest part of the afternoon
+     that token measured 4.51:1, which passes but leaves no margin. */
+  .tone-day {
+    --ink: var(--color-ink);
+    --ink-soft: #5d5042;
+    --ink-faint: #7d6e5c;
+    --hairline: var(--color-line);
+  }
+
+  /* A hairline that belongs to the current tone rather than to a
+     fixed palette value. */
+  .rule {
+    background-color: var(--hairline);
+  }
+
+  /* Small tracked label, set in mono — the instrument's own voice for
+     anything that is a measurement, a date, or a designation. */
+  .tick {
+    font-family: var(--font-mono);
+    font-size: var(--text-tick);
+    letter-spacing: var(--tracking-widest);
+    text-transform: uppercase;
+    color: var(--color-brass);
+  }
+
+  /* ---------------------------------------------------------------
+   * Plate — how every photograph and document is presented. Not a
+   * card: a plate mounted in an instrument. Board, a bevel-cut
+   * window, and the shadow of something standing off its backing.
+   * --------------------------------------------------------------- */
+  .plate {
+    background-color: var(--color-paper-raised);
+    box-shadow:
+      inset 0 0 0 1px rgba(176, 141, 87, 0.35),
+      var(--depth-rest);
+  }
+
+  .plate-window {
+    box-shadow:
+      inset 0 1px 3px rgba(20, 24, 40, 0.22),
+      inset 0 -1px 0 rgba(252, 250, 243, 0.4);
+  }
+
+  /* Glass over a mounted piece: one wide, very low-contrast band. */
+  .glass::after {
+    content: "";
+    position: absolute;
+    inset: 0 -55%;
+    pointer-events: none;
+    background: linear-gradient(
+      104deg,
+      transparent 36%,
+      rgba(255, 252, 244, 0.30) 47%,
+      rgba(255, 252, 244, 0.08) 54%,
+      transparent 63%
+    );
+    animation: sweep 30s ease-in-out infinite;
+  }
+
+  /* Deep-sky colour. Broad, very low-saturation clouds that keep the
+     navy from ever being flat — the difference between "night" and
+     "an empty dark rectangle". Purely additive, so it reads as light
+     in dust rather than as coloured shapes. */
+  .nebula {
+    background-image:
+      radial-gradient(ellipse 58% 44% at 22% 26%, rgba(96, 108, 176, 0.30), transparent 68%),
+      radial-gradient(ellipse 50% 38% at 78% 18%, rgba(150, 116, 148, 0.22), transparent 70%),
+      radial-gradient(ellipse 66% 50% at 62% 74%, rgba(176, 141, 87, 0.18), transparent 72%),
+      radial-gradient(ellipse 40% 34% at 12% 78%, rgba(74, 66, 88, 0.30), transparent 70%);
+  }
+
+  /* Film grain over the sky. Without it, wide gradients band visibly
+     on 8-bit displays; with it, they read as photographed. */
+  .grain::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.055;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* Dust drifting through the near field — larger and slower than
+     stars, and unlike stars they move, which is what separates a
+     foreground plane from a background one. */
+  .mote {
+    animation: drift var(--mote-dur, 26s) linear infinite;
+    animation-delay: var(--mote-delay, 0s);
+  }
+
+  /* Stars. Positioned by the component; twinkle timing comes in per
+     star as custom properties so a field never pulses in unison. */
+  .star {
+    animation: twinkle var(--star-dur, 6s) ease-in-out infinite;
+    animation-delay: var(--star-delay, 0s);
+  }
+
+  /* Very slow rotation for orbital geometry that should turn rather
+     than sit. */
+  .turning {
+    animation: turn var(--turn-dur, 240s) linear infinite;
+  }
+
+  /* A constellation line that draws itself once on load. Requires
+     pathLength="1" on the path so the dash maths is geometry-
+     independent. */
+  .draw-line {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: draw var(--draw-dur, 2.4s) var(--ease) forwards;
+    animation-delay: var(--draw-delay, 0s);
+  }
+
+  /* A node landing just after the line reaches it. */
+  .arrive {
+    opacity: 0;
+    transform-origin: center;
+    animation: arrive 700ms var(--ease) forwards;
+    animation-delay: var(--arrive-delay, 0s);
+  }
+
+  .breathe {
+    animation: breathe var(--breathe-dur, 11s) ease-in-out infinite;
+  }
+
+  /* A meteor. The visible streak is ~1.5% of the cycle, so most of
+     the time nothing is there — which is the entire effect. */
+  .shoot {
+    opacity: 0;
+    animation: shoot var(--shoot-dur, 34s) linear infinite;
+    animation-delay: var(--shoot-delay, 0s);
+  }
+
+  .lunation {
+    animation: lunation var(--lunation-dur, 44s) ease-in-out infinite alternate;
+  }
+}
+
+/* A constellation line drawing itself. Paths carry pathLength="1",
+   so one dash length covers any path regardless of its real geometry
+   and every line in a network can share this single animation. */
+@keyframes draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Nodes arriving after the line reaches them, then holding. */
+@keyframes arrive {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* The gold behind the moon, breathing. Very slow and very small —
+   it should read as light, not as a pulsing element. */
+@keyframes breathe {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.06);
+  }
+}
+
+/* The terminator crossing the disc: a full lunation, waxing to full
+   and back. Pure transform on an overlay, so it costs nothing. */
+@keyframes lunation {
+  0% {
+    transform: translateX(-96%);
+  }
+  50% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(96%);
+  }
+}
+
+/* Dust crossing the near field and fading at both ends, so a mote
+   never visibly pops into or out of existence. */
+@keyframes drift {
+  0% {
+    transform: translate3d(0, 0, 0);
+    opacity: 0;
+  }
+  12%,
+  80% {
+    opacity: var(--mote-opacity, 0.5);
+  }
+  100% {
+    transform: translate3d(var(--mote-x, 40px), var(--mote-y, -120px), 0);
+    opacity: 0;
+  }
+}
+
+/* The streak travels and fades within a very short window of a long
+   cycle. `scaleX` from 0 makes it draw out from its own head rather
+   than sliding in as a finished line. */
+@keyframes shoot {
+  0%,
+  0.4% {
+    opacity: 0;
+    transform: translate3d(0, 0, 0) rotate(var(--shoot-angle, 22deg)) scaleX(0);
+  }
+  0.9% {
+    opacity: 0.9;
+    transform: translate3d(6vw, 3vw, 0) rotate(var(--shoot-angle, 22deg)) scaleX(1);
+  }
+  1.9% {
+    opacity: 0;
+    transform: translate3d(15vw, 7vw, 0) rotate(var(--shoot-angle, 22deg)) scaleX(0.85);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(15vw, 7vw, 0) rotate(var(--shoot-angle, 22deg)) scaleX(0);
+  }
+}
+
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: var(--star-min, 0.15);
+    transform: scale(1);
+  }
+  50% {
+    opacity: var(--star-max, 0.8);
+    transform: scale(1.35);
+  }
+}
+
+@keyframes turn {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes sweep {
+  0%,
+  40% {
+    transform: translateX(-60%);
+  }
+  60%,
+  100% {
+    transform: translateX(60%);
+  }
+}
