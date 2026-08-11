@@ -10,19 +10,25 @@ import type { ImageAsset } from "@/types/content"
 export const hero = {
   eyebrow: "Since 1910",
   /**
-   * Shortened from the document's own phrase, "Over 100 Years of
-   * Scripturally Accurate Tradition", at the client's direction — a
-   * long headline weakened the opening.
+   * The opening has to answer "what is this?" before it answers "why
+   * trust it?".
    *
-   * Deliberately built only from words the source document already
-   * uses ("a century", "scriptural", "accuracy"), so the claim is
-   * unchanged and nothing new is asserted. Suggested alternatives
-   * along the lines of "Panchang Excellence" were not used: the
-   * document does not make that claim, and this project does not
-   * invent them. The full original phrase is retained verbatim as
-   * `site.tagline` and still appears in the colophon.
+   * The previous headline — "A Century of Scriptural Accuracy" — made
+   * a claim about a thing it never named. A reader who has never met
+   * a Panchang learned only that something had been accurate for a
+   * hundred years, which is why the client reported the hero as
+   * confusing. Accuracy is the second question; it is answered
+   * immediately below, and again by the whole page.
+   *
+   * "Almanac" is the word that does the work: it is the source
+   * document's own term for a Panchang, and it is the one word a
+   * newcomer already understands. "Read from the sky" is a plain
+   * description of the method — a Panchang is computed from the
+   * positions of sun and moon — and asserts nothing the document
+   * does not. No new claim is introduced. The original phrase is
+   * still carried verbatim as `site.tagline` in the colophon.
    */
-  heading: "A Century of Scriptural Accuracy",
+  heading: "The Hindu Almanac, Read from the Sky",
   /**
    * The opening line is a story rather than a definition, at the
    * client's direction — a reader meets the five elements further
@@ -37,9 +43,13 @@ export const hero = {
    */
   body: "For more than a century, in tens of thousands of homes across India, the day has begun with the same family's reckoning of it — three generations, one Panchang, checked against scripture every single year.",
   /**
-   * The document's technical definition, kept because it is source
-   * content and still belongs on the page — now carried lower down
-   * rather than in the opening.
+   * The document's own definition, promoted into the opening.
+   *
+   * It was written for the page and then buried below the fold,
+   * which left the hero naming nothing. It is the clearest sentence
+   * in the source material and it belongs where the question is
+   * first asked. Verbatim — the five elements are named exactly as
+   * the document names them.
    */
   definition:
     "A Panchang is the traditional Hindu almanac that identifies each day through five essential elements — Tithi, Vara, Nakshatra, Yoga, and Karana.",

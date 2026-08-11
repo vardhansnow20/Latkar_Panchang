@@ -2,8 +2,8 @@ import { useRef } from "react"
 import { m, useScroll, useTransform } from "framer-motion"
 import { Register } from "@/components/sky/Register"
 import { Action } from "@/components/sky/Action"
+import { Orrery } from "@/components/sky/Orrery"
 import {
-  Astrolabe,
   StarField,
   ShootingStars,
   MoteField,
@@ -109,21 +109,25 @@ export function Opening() {
         </div>
       </m.div>
 
-      {/* 4 — the instrument. Pushed above centre, and dropped to a
-          quarter strength so it reads as the room rather than the
-          subject. */}
+      {/* 4 — the orrery.
+          Centred on the headline rather than pushed above it, so the
+          lit core sits behind the type and the words read as though
+          they are inside the light. The astrolabe it replaced had to
+          be held at quarter strength to stay out of the way; this
+          figure is a fifth of the geometry, so it can carry more
+          presence without competing. */}
       <m.div
         style={{ y: labY, scale: labScale, opacity: midFade }}
-        className="pointer-events-none absolute inset-x-0 top-[38%] flex -translate-y-1/2 justify-center"
+        className="pointer-events-none absolute inset-x-0 top-[47%] flex -translate-y-1/2 justify-center"
         aria-hidden="true"
       >
-        <div className="aspect-square w-[172vw] max-w-[64rem] opacity-[0.26] sm:w-[116vw] lg:w-[106svh]">
-          <Astrolabe className="h-full w-full text-[var(--color-brass-soft)]" />
+        <div className="aspect-square w-[168vw] max-w-[62rem] opacity-[0.34] sm:w-[112vw] lg:w-[102svh]">
+          <Orrery className="h-full w-full text-[var(--color-brass-soft)]" />
         </div>
       </m.div>
 
       {/* The moon's light falling on the instrument. Must live here,
-          untransformed, and painted after the astrolabe: every other
+          untransformed, and painted after the orrery: every other
           plane is transformed, and a transform creates a stacking
           context that isolates blend modes, so a glow authored inside
           the moon could never reach the brass. */}
@@ -202,9 +206,9 @@ export function Opening() {
 
         <m.p
           variants={rise}
-          className="mb-[clamp(1.1rem,3.2svh,2.25rem)] max-w-[54ch] text-lead text-[var(--ink-soft)]"
+          className="mb-[clamp(1.1rem,3.2svh,2.25rem)] max-w-[52ch] text-lead text-[var(--ink-soft)]"
         >
-          {hero.body}
+          {hero.definition}
         </m.p>
 
         <m.div variants={rise}>
