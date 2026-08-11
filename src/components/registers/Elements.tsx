@@ -1,70 +1,96 @@
-import { m } from "framer-motion"
+import { useEffect, useRef, useState } from "react"
+import { m, useMotionValue, type MotionValue } from "framer-motion"
 import { Register, Measure } from "@/components/sky/Register"
 import { Figure, StarField } from "@/components/sky/Celestial"
 import { elements, panchangElements, type PanchangElement } from "@/data/elements"
 import { rise, sequence, viewport } from "@/lib/motion"
 import { cn } from "@/lib/utils"
+import { useReducedMotion } from "@/hooks/useReducedMotion"
+import { onScrollFrame } from "@/lib/onScroll"
 
 /**
  * What a Panchang is, and the five limbs it is made of.
  *
- * The definition and the five elements are one register rather than
- * two: the source document gives a single sentence for the first and
- * five bare names for the second, so split apart each would be a
- * screen of air around one line of text.
+ * ── The sequence ──────────────────────────────────────────────────
+ * The five were a row of equal cards, which said "here are five
+ * things" and nothing else. They are now taken one at a time: the
+ * reader descends, the ring turns, and each limb comes to the centre
+ * in turn and is read there. Five parts of one day, met in order,
+ * rather than five tiles scanned at once.
  *
- * ── The composition ───────────────────────────────────────────────
- * The five are stations on an arc, not cells in a row. Each carries
- * its own slowly turning ring at its own period, an oversized ghost
- * numeral set behind the glyph, and the name beneath. On desktop they
- * are stepped vertically along a shallow curve so the set reads as a
- * measured arc rather than five equal boxes — the eye travels the
- * line instead of scanning a table.
+ * ── What it does not do ───────────────────────────────────────────
+ * It does not explain what the limbs *mean*. The source document
+ * names Tithi, Vara, Nakshatra, Yoga and Karana and defines none of
+ * them, and these are scriptural terms with precise meanings — an
+ * invented gloss on a hundred-year-old almanac would be worse than
+ * silence. Each limb keeps a reserved slot that renders the moment
+ * authentic text is supplied, with no layout change needed.
  *
- * Nothing here explains what the elements *mean*, because the source
- * document does not. Each keeps a reserved slot that will render a
- * definition the moment authentic text is supplied, with no layout
- * change needed.
+ * What the sequence *can* honestly teach is structure: that there are
+ * five, that they are ordered, and that they are limbs of one system
+ * rather than five unrelated features. That is what it does.
+ *
+ * ── Why it does not lag ───────────────────────────────────────────
+ * The same mechanism as the century dial, for the same reasons:
+ *
+ *   — one passive scroll listener, rAF-throttled and shared;
+ *   — the ring's angle is a MotionValue written directly to a
+ *     transform, so turning it never re-renders React;
+ *   — the only React state is the active index, and it is quantised,
+ *     so it changes five times across the whole scene rather than
+ *     once per frame;
+ *   — the turning element is promoted with will-change, so its
+ *     rotation is composited rather than repainted.
+ *
+ * Nothing is scroll-jacked: the page scrolls at its own speed and the
+ * scene is a function of how far through it you are.
  */
 
-/** Vertical offsets tracing a shallow arc across the five stations.
- * Applied only from `lg`, where there is width for the curve to read
- * as a curve rather than as five misaligned items. */
-const ARC = ["lg:translate-y-7", "lg:translate-y-2", "lg:translate-y-0", "lg:translate-y-2", "lg:translate-y-7"]
-
-/** Distinct, slow, mutually prime-ish periods, so the five rings never
- * fall into visible lockstep with one another. */
-const PERIODS = [188, 233, 151, 271, 207]
+const COUNT = panchangElements.length
+/** Half a screen per limb, plus a little at each end so the first
+ * arrives and the last departs rather than snapping at the edges. */
+const SCENE_SCREENS = COUNT * 0.5 + 0.4
 
 /** Devanagari numerals, since the numbering belongs to the same
  * writing system as the names it counts. */
 const NUMERALS = ["१", "२", "३", "४", "५"]
 
 export function Elements() {
+  const sceneRef = useRef<HTMLDivElement>(null)
+  const prefersReducedMotion = useReducedMotion()
+  const [active, setActive] = useState(0)
+  const rotation = useMotionValue(0)
+  const step = 360 / COUNT
+
+  useEffect(() => {
+    if (prefersReducedMotion) return
+    const el = sceneRef.current
+    if (!el) return
+
+    const read = () => {
+      const rect = el.getBoundingClientRect()
+      const travel = rect.height - document.documentElement.clientHeight
+      if (travel <= 0) return
+      const p = Math.min(Math.max(-rect.top / travel, 0), 1)
+      rotation.set(-step * (COUNT - 1) * p)
+      const i = Math.min(Math.max(Math.round(p * (COUNT - 1)), 0), COUNT - 1)
+      setActive((prev) => (prev === i ? prev : i))
+    }
+
+    return onScrollFrame(read)
+  }, [prefersReducedMotion, rotation, step])
+
   return (
-    <Register id="elements" tone="night" height="vast" className="overflow-hidden">
+    /* No `overflow-hidden`: an ancestor that clips becomes a scroll
+       container, and `position: sticky` would then anchor to it rather
+       than to the viewport, so the scene would never stick. */
+    <Register id="elements" tone="night" height="open">
       <StarField count={34} className="absolute inset-0" />
 
-      {/* Sacred geometry behind the five — this is the one register
-          about the structure the calculations rest on. */}
-      {/* Held deliberately below the hero's weight. The hero carries
-          the page's one full instrument at 0.26; this register is a
-          definition, so its geometry stays at roughly a third of that
-          — present, never competing. */}
       <Figure
         name="yantra" opacity={0.08}
         turning
         className="pointer-events-none absolute hidden sm:block top-1/2 left-1/2 h-[40rem] w-[40rem] -translate-x-1/2 -translate-y-1/2 text-[var(--color-brass-soft)] lg:h-[54rem] lg:w-[54rem]"
-      />
-      {/* Ambient warmth beneath the arc, so the group sits in light
-          rather than floating on flat navy. */}
-      <div
-        aria-hidden="true"
-        className="breathe pointer-events-none absolute bottom-[18%] left-1/2 h-[22rem] w-[80%] max-w-[56rem] -translate-x-1/2 rounded-full"
-        style={{
-          background:
-            "radial-gradient(ellipse at center, rgba(176,141,87,0.12) 0%, rgba(176,141,87,0.04) 42%, transparent 70%)",
-        }}
       />
 
       <m.div
@@ -72,134 +98,188 @@ export function Elements() {
         whileInView="visible"
         viewport={viewport}
         variants={rise}
-        className="relative mb-[var(--s-6)]"
+        className="relative mb-[var(--s-5)]"
       >
         <p className="tick mb-[var(--s-3)]">{elements.eyebrow}</p>
         <h2 className="mb-[var(--s-4)] max-w-[16ch] text-register text-[var(--ink)]">
           {elements.heading}
         </h2>
         <Measure size="wide">
-          {/* A drop cap, as a museum wall text would set it — the one
-              place on the page type behaves like printed matter. */}
+          {/* A drop cap, as a museum wall text would set it. */}
           <p className="text-lead text-[var(--ink-soft)] [&::first-letter]:float-left [&::first-letter]:mt-[0.08em] [&::first-letter]:mr-[0.09em] [&::first-letter]:font-[family-name:var(--font-display)] [&::first-letter]:text-[3.4em] [&::first-letter]:leading-[0.78] [&::first-letter]:text-[var(--metal)]">
             {elements.definition}
           </p>
         </Measure>
       </m.div>
 
-      <m.ol
-        initial="hidden"
-        whileInView="visible"
-        viewport={viewport}
-        variants={sequence}
-        className="relative grid gap-[var(--s-6)] sm:grid-cols-2 lg:grid-cols-5 lg:items-start lg:gap-[var(--s-3)]"
-      >
-        {/* The shared path.
-         *
-         * Without it the five read as five separate objects that
-         * happen to be adjacent. One orbit drawn through all of their
-         * centres makes them limbs of a single system, which is what
-         * they are — five readings of one day, not five features.
-         *
-         * The curve matches the vertical arc the stations are stepped
-         * along, and sits at the height of their ring centres. Desktop
-         * only: at one and two columns there is no shared line to
-         * draw, and the stacking already reads as a sequence. */}
-        <svg
-          aria-hidden="true"
-          viewBox="0 0 1000 80"
-          preserveAspectRatio="none"
-          className="pointer-events-none absolute inset-x-0 top-[60px] hidden h-[80px] w-full lg:block"
-        >
-          <path
-            d="M4 60 Q500 -4 996 60"
-            fill="none"
-            stroke="var(--color-brass)"
-            strokeWidth="1"
-            opacity="0.3"
-            vectorEffect="non-scaling-stroke"
-          />
-          <path
-            d="M4 66 Q500 2 996 66"
-            fill="none"
-            stroke="var(--color-brass-soft)"
-            strokeWidth="1"
-            strokeDasharray="2 8"
-            opacity="0.22"
-            vectorEffect="non-scaling-stroke"
-          />
-        </svg>
-
-        {panchangElements.map((el, i) => (
-          <Station key={el.id} element={el} index={i} />
-        ))}
-      </m.ol>
+      {prefersReducedMotion ? (
+        <StaticRow />
+      ) : (
+        <div ref={sceneRef} style={{ height: `${SCENE_SCREENS * 100}svh` }} className="relative">
+          <div className="sticky top-0 flex h-[100svh] items-center overflow-hidden">
+            <Wheel rotation={rotation} active={active} />
+          </div>
+        </div>
+      )}
     </Register>
   )
 }
 
-function Station({ element, index }: { element: PanchangElement; index: number }) {
+/** The turning ring, and the limb currently at the centre. */
+function Wheel({
+  rotation,
+  active,
+}: {
+  rotation: MotionValue<number>
+  active: number
+}) {
+  const step = 360 / COUNT
+
   return (
-    <m.li
-      variants={rise}
-      className={cn("group/el relative flex flex-col items-center text-center", ARC[index])}
-    >
-      {/* The station's own sky: a ring turning at its own period, and
-          a second, fainter one turning against it. Both are transform-
-          only, so five of them cost nothing. */}
-      <div className="relative mb-[var(--s-4)] flex aspect-square w-[7.5rem] items-center justify-center sm:w-[8.5rem]">
-        <div
-          className="turning absolute inset-0 rounded-full border border-[var(--color-brass)]/25 transition-colors duration-[var(--t-reveal)] group-hover/el:border-[var(--color-brass)]/55"
-          style={{ ["--turn-dur" as string]: `${PERIODS[index]}s` }}
-        />
-        <div
-          className="turning absolute inset-[14%] rounded-full border border-dashed border-[var(--color-brass-soft)]/20"
-          style={{ ["--turn-dur" as string]: `${PERIODS[index] * 1.6}s`, animationDirection: "reverse" }}
-        />
-
-        {/* The oversized numeral, ghosted behind the glyph. */}
-        <span
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 flex items-center justify-center text-[4.75rem] leading-none text-[var(--color-brass-soft)]/[0.08] transition-[color,transform] duration-[var(--t-reveal)] ease-[var(--ease)] group-hover/el:scale-105 group-hover/el:text-[var(--color-brass-soft)]/[0.14] sm:text-[5.5rem]"
-          style={{ fontFamily: "var(--font-devanagari)" }}
+    <div className="relative flex w-full flex-col items-center">
+      {/* ── The ring ─────────────────────────────────────────────
+          Five stations on one orbit, marking the limbs' places as the
+          ring carries each in turn to the centre. They are plain
+          marks rather than labels, so nothing here needs the
+          counter-rotation the century dial's upright years require. */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute top-1/2 left-1/2 aspect-square w-[112vw] max-w-[34rem] -translate-x-1/2 -translate-y-1/2 sm:w-[86vw] lg:w-[40rem]"
+      >
+        <m.div
+          className="h-full w-full"
+          style={{ rotate: rotation, willChange: "transform" }}
         >
-          {NUMERALS[index]}
-        </span>
+          <div className="absolute inset-0 rounded-full border border-[var(--color-brass)]/22" />
+          <div className="absolute inset-[13%] rounded-full border border-dashed border-[var(--color-brass-soft)]/14" />
 
-        {/* A held glow that rises only on approach. */}
-        <span
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-[-18%] rounded-full opacity-0 transition-opacity duration-[var(--t-reveal)] ease-[var(--ease)] group-hover/el:opacity-100"
-          style={{
-            background:
-              "radial-gradient(circle, rgba(233,214,170,0.22) 0%, rgba(176,141,87,0.08) 45%, transparent 70%)",
-          }}
-        />
-
-        <span
-          className="relative text-[2.6rem] leading-none text-[var(--color-brass-soft)] transition-transform duration-[var(--t-reveal)] ease-[var(--ease)] group-hover/el:-translate-y-1 sm:text-[3rem]"
-          style={{ fontFamily: "var(--font-devanagari)" }}
-        >
-          {element.script}
-        </span>
+          {panchangElements.map((el, i) => {
+            const angle = i * step
+            const lit = i === active
+            return (
+              // A full-size box rotated about the ring's centre, with
+              // the station sitting on its top edge. Rotating a
+              // zero-size element and translating it by a percentage
+              // moves it nowhere, and container units need a container
+              // context this has no reason to declare.
+              <div
+                key={el.id}
+                className="absolute inset-0"
+                style={{ transform: `rotate(${angle}deg)` }}
+              >
+                <span
+                  className={cn(
+                    "absolute top-0 left-1/2 block size-2 -translate-x-1/2 -translate-y-1/2 rounded-full",
+                    "transition-[background-color,box-shadow] duration-[var(--t-reveal)]",
+                    lit
+                      ? "bg-[var(--color-brass-soft)] shadow-[var(--glow-gold)]"
+                      : "bg-[var(--color-brass)]/35"
+                  )}
+                />
+              </div>
+            )
+          })}
+        </m.div>
       </div>
 
-      <span className="tick mb-[var(--s-2)] tabular-nums">
-        {String(index + 1).padStart(2, "0")}
-      </span>
+      {/* ── The limb being read ──────────────────────────────────
+          Every limb stays mounted and in document order; only which
+          one is visually foremost changes, so the section reads
+          correctly to a screen reader and to search. */}
+      <ol className="relative grid w-full place-items-center">
+        {panchangElements.map((el, i) => (
+          <li
+            key={el.id}
+            aria-current={i === active ? "true" : undefined}
+            className={cn(
+              // All five occupy the same cell; the inactive ones are
+              // faded rather than unmounted.
+              "col-start-1 row-start-1 flex flex-col items-center text-center",
+              "transition-[opacity,transform] duration-[var(--t-reveal)] ease-[var(--ease)]",
+              i === active
+                ? "opacity-100"
+                : "pointer-events-none translate-y-3 opacity-0"
+            )}
+            style={{ willChange: "opacity, transform" }}
+          >
+            <Limb element={el} index={i} />
+          </li>
+        ))}
+      </ol>
+    </div>
+  )
+}
+
+function Limb({ element, index }: { element: PanchangElement; index: number }) {
+  return (
+    <>
       <span
-        className="text-lead text-[var(--ink)] transition-colors duration-[var(--t-reveal)]"
+        aria-hidden="true"
+        className="mb-[var(--s-3)] block text-[clamp(3.5rem,17vw,7rem)] leading-none text-[var(--color-brass-soft)]"
+        style={{ fontFamily: "var(--font-devanagari)" }}
+      >
+        {NUMERALS[index]}
+      </span>
+
+      <span
+        className="block text-[clamp(3rem,14vw,6rem)] leading-[1.05] text-[var(--color-brass-soft)]"
+        style={{ fontFamily: "var(--font-devanagari)" }}
+      >
+        {element.script}
+      </span>
+
+      <span className="tick mt-[var(--s-4)] tabular-nums">
+        {String(index + 1).padStart(2, "0")} / {String(COUNT).padStart(2, "0")}
+      </span>
+
+      <span
+        className="mt-[var(--s-2)] block text-title text-[var(--ink)]"
         style={{ fontFamily: "var(--font-display)" }}
       >
         {element.name}
       </span>
 
-      {/* Renders only once authentic source text exists. */}
+      {/* Renders the moment authentic source text exists. Until then
+          the limb is presented by name, which is all the document
+          supports. */}
       {element.meaning && (
-        <span className="mt-[var(--s-2)] max-w-[22ch] text-note text-[var(--ink-soft)]">
+        <span className="mt-[var(--s-3)] block max-w-[34ch] text-body text-[var(--ink-soft)]">
           {element.meaning}
         </span>
       )}
-    </m.li>
+    </>
+  )
+}
+
+/** The honest fallback under reduced motion: the five, plainly. */
+function StaticRow() {
+  return (
+    <m.ol
+      initial="hidden"
+      whileInView="visible"
+      viewport={viewport}
+      variants={sequence}
+      className="relative grid gap-[var(--s-5)] sm:grid-cols-3 lg:grid-cols-5"
+    >
+      {panchangElements.map((el, i) => (
+        <m.li key={el.id} variants={rise} className="flex flex-col items-center text-center">
+          <span
+            className="text-[2.6rem] leading-none text-[var(--color-brass-soft)]"
+            style={{ fontFamily: "var(--font-devanagari)" }}
+          >
+            {el.script}
+          </span>
+          <span className="tick mt-[var(--s-3)] tabular-nums">
+            {String(i + 1).padStart(2, "0")}
+          </span>
+          <span
+            className="mt-[var(--s-2)] text-lead text-[var(--ink)]"
+            style={{ fontFamily: "var(--font-display)" }}
+          >
+            {el.name}
+          </span>
+        </m.li>
+      ))}
+    </m.ol>
   )
 }

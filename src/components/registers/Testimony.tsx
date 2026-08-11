@@ -1,5 +1,5 @@
 import { m } from "framer-motion"
-import { Register, Measure } from "@/components/sky/Register"
+import { Register, Measure, ChapterMark } from "@/components/sky/Register"
 import { Plate } from "@/components/sky/Plate"
 import { Figure } from "@/components/sky/Celestial"
 import { about } from "@/data/about"
@@ -58,7 +58,7 @@ export function Trust() {
         variants={rise}
         className="relative mb-[var(--s-6)]"
       >
-        <p className="tick mb-[var(--s-3)]">{trustJourney.eyebrow}</p>
+        <p className="tick mb-[var(--s-3)]"><ChapterMark n={3} /> {trustJourney.eyebrow}</p>
         <h2 className="mb-[var(--s-4)] max-w-[16ch] text-chapter text-[var(--ink)]">
           {trustJourney.heading}
         </h2>

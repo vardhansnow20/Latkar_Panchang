@@ -1,7 +1,7 @@
 import { useRef, useState } from "react"
 import { m, useScroll, useTransform } from "framer-motion"
 import { Maximize2 } from "lucide-react"
-import { Register, Measure } from "@/components/sky/Register"
+import { Register, Measure, ChapterMark } from "@/components/sky/Register"
 import { Plate } from "@/components/sky/Plate"
 import { Figure } from "@/components/sky/Celestial"
 import { Lightbox, type LightboxItem } from "@/components/sky/Lightbox"
@@ -59,7 +59,7 @@ export function Inside() {
         variants={rise}
         className="relative mb-[var(--s-6)]"
       >
-        <p className="tick mb-[var(--s-3)]">{insideEdition.eyebrow}</p>
+        <p className="tick mb-[var(--s-3)]"><ChapterMark n={2} /> {insideEdition.eyebrow}</p>
         <h2 className="mb-[var(--s-4)] max-w-[16ch] text-chapter text-[var(--ink)]">
           {insideEdition.heading}
         </h2>

@@ -1,7 +1,8 @@
 import { useState } from "react"
 import { m } from "framer-motion"
 import { Maximize2 } from "lucide-react"
-import { Register, Measure } from "@/components/sky/Register"
+import { Register, Measure, ChapterMark } from "@/components/sky/Register"
+import { Horizon } from "@/components/sky/Horizon"
 import { Plate } from "@/components/sky/Plate"
 import { Action } from "@/components/sky/Action"
 import { Figure, StarField } from "@/components/sky/Celestial"
@@ -35,7 +36,7 @@ export function Calendar() {
         variants={rise}
         className="mb-[var(--s-6)]"
       >
-        <p className="tick mb-[var(--s-3)]">{laxmiCalendar.eyebrow}</p>
+        <p className="tick mb-[var(--s-3)]"><ChapterMark n={5} /> {laxmiCalendar.eyebrow}</p>
         <h2 className="mb-[var(--s-2)] max-w-[14ch] text-chapter text-[var(--ink)]">
           {laxmiCalendar.heading}
         </h2>
@@ -146,9 +147,10 @@ export function Dusk() {
         variants={rise}
         className="relative flex min-h-[52svh] items-center justify-center"
       >
-        <Figure
-          name="arc" opacity={0.4}
-          className="h-[8rem] w-full max-w-[44rem] rotate-180 text-[var(--ink-faint)] lg:h-[11rem]"
+        {/* The same crossing, going the other way. */}
+        <Horizon
+          phase="set"
+          className="h-[14rem] w-full max-w-[50rem] text-[var(--ink-faint)] sm:h-[17rem] lg:h-[21rem]"
         />
       </m.div>
     </Register>

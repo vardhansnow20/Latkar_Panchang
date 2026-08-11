@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { m } from "framer-motion"
-import { Register, Measure } from "@/components/sky/Register"
+import { Register, Measure, ChapterMark } from "@/components/sky/Register"
 import { Gallery } from "@/components/sky/Gallery"
 import { Plate, PlateLabel } from "@/components/sky/Plate"
 import { Figure } from "@/components/sky/Celestial"
@@ -168,6 +168,12 @@ export function Archive() {
         variants={rise}
         className="relative mb-[var(--s-6)]"
       >
+        {/* This register's eyebrow is the epoch numeral itself, which
+            already declares rank by sheer size. The mark is still set
+            above it so the chapter sequence does not skip IV. */}
+        <p className="tick mb-[var(--s-3)]">
+          <ChapterMark n={4} />
+        </p>
         <p className="text-epoch text-[var(--metal)] tabular-nums" style={display}>
           {legacyArchive.eyebrow}
         </p>

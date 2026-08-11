@@ -109,10 +109,10 @@
   --text-lead: clamp(1.125rem, 1.06rem + 0.32vw, 1.3125rem); /* 18–21px */
   --text-lead--line-height: 1.55;
 
-  --text-title: clamp(1.5rem, 1.28rem + 1.05vw, 2.25rem); /* 24–36px */
+  --text-title: clamp(1.25rem, 1.06rem + 0.95vw, 2rem); /* 20–32px */
   --text-title--line-height: 1.24;
 
-  --text-chapter: clamp(2.75rem, 1.9rem + 4vw, 5rem); /* 44–80px */
+  --text-chapter: clamp(2.5rem, 1.62rem + 4.2vw, 5rem); /* 40–80px */
   --text-chapter--line-height: 1.05;
   --text-chapter--letter-spacing: var(--tracking-tight);
 
@@ -123,7 +123,7 @@
    * section heading beneath it — the page's title carried less weight
    * than "Explore the Panchang". A masthead has to out-rank the
    * chapters it introduces, so it gets its own step above them. */
-  --text-hero: clamp(3.5rem, 2rem + 6.4vw, 8rem); /* 56–128px */
+  --text-hero: clamp(4rem, 2.4rem + 6.8vw, 8rem); /* 64–128px */
   --text-hero--line-height: 1.0;
   --text-hero--letter-spacing: -0.026em;
 
@@ -136,7 +136,7 @@
    * major registers (the history, the edition, the trust, the
    * archive, the calendar) keep chapter; the registers that explain
    * or close take this. */
-  --text-register: clamp(1.875rem, 1.4rem + 2.3vw, 3.125rem); /* 30–50px */
+  --text-register: clamp(1.625rem, 1.16rem + 2.3vw, 3.125rem); /* 26–50px */
   --text-register--line-height: 1.14;
   --text-register--letter-spacing: -0.012em;
 

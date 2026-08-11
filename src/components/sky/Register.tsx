@@ -112,3 +112,26 @@ export function Measure({
 }) {
   return <div className={cn(MEASURE[size], className)}>{children}</div>
 }
+
+/**
+ * The chapter mark.
+ *
+ * Size alone was carrying the whole hierarchy, and size is the first
+ * thing a narrow viewport takes away: at 375px the gap between a
+ * chapter and a supporting register had compressed to a few pixels,
+ * so every heading read as equally important.
+ *
+ * A numeral fixes that independently of width. Only the five major
+ * movements carry one, so its presence — not its size — is what says
+ * "this is a chapter". The supporting registers stay unnumbered and
+ * are legible as subordinate at any width.
+ */
+export function ChapterMark({ n }: { n: number }) {
+  const roman = ["I", "II", "III", "IV", "V", "VI", "VII"][n - 1] ?? String(n)
+  return (
+    <span aria-hidden="true" className="inline-flex items-center gap-[var(--s-2)]">
+      <span className="text-[var(--metal)]">{roman}</span>
+      <span className="inline-block h-px w-6 bg-[var(--hairline)] align-middle" />
+    </span>
+  )
+}

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react"
 import { m, useMotionValue, useTransform, type MotionValue } from "framer-motion"
-import { Register, Measure } from "@/components/sky/Register"
+import { Register, Measure, ChapterMark } from "@/components/sky/Register"
+import { Horizon } from "@/components/sky/Horizon"
 import { Plate } from "@/components/sky/Plate"
 import { Figure, StarField } from "@/components/sky/Celestial"
 import { history, historyTimeline } from "@/data/history"
@@ -98,7 +99,7 @@ export function Descent() {
 
       <Measure size="wide" className="relative mb-[var(--s-6)]">
         <m.div initial="hidden" whileInView="visible" viewport={viewport} variants={rise}>
-          <p className="tick mb-[var(--s-3)]">{history.eyebrow}</p>
+          <p className="tick mb-[var(--s-3)]"><ChapterMark n={1} /> {history.eyebrow}</p>
           <h2 className="mb-[var(--s-3)] text-chapter text-[var(--ink)]">{history.heading}</h2>
           <p className="text-lead text-[var(--ink-soft)]">{history.intro}</p>
         </m.div>
@@ -321,9 +322,13 @@ export function Meridian() {
         variants={rise}
         className="relative flex min-h-[62svh] items-center justify-center"
       >
-        <Figure
-          name="arc" opacity={0.45}
-          className="h-[9rem] w-full max-w-[46rem] text-[var(--ink-faint)] lg:h-[13rem]"
+        {/* A Panchang's day begins at sunrise, not at midnight. This
+            is the band where the page's own sky crosses from night
+            into day, and it cannot carry words — so it carries the
+            thing the words would have described. */}
+        <Horizon
+          phase="rise"
+          className="h-[16rem] w-full max-w-[52rem] text-[var(--ink-faint)] sm:h-[20rem] lg:h-[24rem]"
         />
       </m.div>
     </Register>
