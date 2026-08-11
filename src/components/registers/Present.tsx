@@ -9,7 +9,7 @@ import { Lightbox } from "@/components/sky/Lightbox"
 import { laxmiCalendar } from "@/data/laxmiCalendar"
 import { mobileApp } from "@/data/mobileApp"
 import { contact } from "@/data/contact"
-import { rise, unveil, sequence, viewport } from "@/lib/motion"
+import { rise, sequence, viewport } from "@/lib/motion"
 
 /**
  * The three daylight registers — the things you can hold, or will be
@@ -55,13 +55,19 @@ export function Calendar() {
           with the label beside it at reading height. Running a 1:1.5
           sheet full-bleed would have made it several screens tall. */}
       <div className="lg:flex lg:items-start lg:gap-[var(--s-6)]">
-        <m.div
-          initial="hidden"
-          whileInView="visible"
-          viewport={viewport}
-          variants={unveil}
-          className="mb-[var(--s-5)] w-full max-w-[26rem] lg:mb-0 lg:w-[42%] lg:max-w-none lg:shrink-0"
-        >
+        {/* No clip-path reveal on this plate, deliberately.
+         *
+         * It was wrapped in `unveil`, whose hidden state is
+         * `inset(0 0 100% 0)` — fully clipped. A reveal like that has
+         * a failure mode with no floor: if the in-view trigger does
+         * not fire, the element keeps its layout box and shows
+         * nothing, which is precisely what was reported here — a
+         * blank space of the right size and shape, with healthy
+         * markup and a 200 on the image behind it.
+         *
+         * The calendar is the product this section exists to show.
+         * It renders unconditionally; correctness beats the nicety. */}
+        <div className="mb-[var(--s-5)] w-full max-w-[26rem] lg:mb-0 lg:w-[42%] lg:max-w-none lg:shrink-0">
           <div className="group/sheet relative rotate-[-0.6deg] transition-transform duration-[var(--t-reveal)] ease-[var(--ease)] hover:-translate-y-1.5 hover:rotate-0">
             <button
               type="button"
@@ -79,7 +85,7 @@ export function Calendar() {
               <span className="tick text-[var(--color-paper)]">Tap to open</span>
             </span>
           </div>
-        </m.div>
+        </div>
 
         <m.div initial="hidden" whileInView="visible" viewport={viewport} variants={rise}>
           <p className="tick mb-[var(--s-3)] tabular-nums">{laxmiCalendar.plate.designation}</p>
