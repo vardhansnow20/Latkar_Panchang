@@ -66,7 +66,7 @@ function Pin() {
   return (
     <span
       aria-hidden="true"
-      className="pointer-events-none absolute -top-2 left-1/2 z-10 size-[11px] -translate-x-1/2 rounded-full"
+      className="pointer-events-none absolute hidden sm:block -top-2 left-1/2 z-10 size-[11px] -translate-x-1/2 rounded-full"
       style={{
         background: "radial-gradient(circle at 34% 30%, #f0e0bd 0%, #c2a273 48%, #8a6b3c 100%)",
         boxShadow: "0 2px 5px rgba(20,24,40,0.45), 0 0 0 1px rgba(120,92,48,0.35)",

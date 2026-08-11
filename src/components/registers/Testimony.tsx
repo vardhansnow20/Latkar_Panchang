@@ -37,7 +37,7 @@ export function Trust() {
           morning here, so the two agree — cosmic knowledge handed on
           into human tradition. */}
       <div
-        className="pointer-events-none absolute inset-0 opacity-[0.55]"
+        className="pointer-events-none absolute hidden sm:block inset-0 opacity-[0.55]"
         aria-hidden="true"
         style={{
           background:

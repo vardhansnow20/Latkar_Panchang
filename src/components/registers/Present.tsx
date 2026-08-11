@@ -170,7 +170,7 @@ export function Almanac() {
         name="orbits"
         turning
         opacity={0.16}
-        className="pointer-events-none absolute -right-[28%] top-1/2 h-[34rem] w-[34rem] -translate-y-1/2 text-[var(--color-brass-soft)] lg:-right-[12%] lg:h-[44rem] lg:w-[44rem]"
+        className="pointer-events-none absolute hidden sm:block -right-[28%] top-1/2 h-[34rem] w-[34rem] -translate-y-1/2 text-[var(--color-brass-soft)] lg:-right-[12%] lg:h-[44rem] lg:w-[44rem]"
       />
 
       <div className="relative lg:flex lg:items-center lg:gap-[var(--s-7)]">
@@ -261,7 +261,7 @@ export function Reach() {
       <Figure
         name="wheel" opacity={0.18}
         turning
-        className="pointer-events-none absolute left-1/2 top-1/2 h-[30rem] w-[30rem] -translate-x-1/2 -translate-y-1/2 text-[var(--ink-faint)] lg:h-[42rem] lg:w-[42rem]"
+        className="pointer-events-none absolute hidden sm:block left-1/2 top-1/2 h-[30rem] w-[30rem] -translate-x-1/2 -translate-y-1/2 text-[var(--ink-faint)] lg:h-[42rem] lg:w-[42rem]"
       />
 
       <m.div

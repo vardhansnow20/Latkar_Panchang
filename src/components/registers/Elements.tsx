@@ -54,7 +54,7 @@ export function Elements() {
       <Figure
         name="yantra" opacity={0.08}
         turning
-        className="pointer-events-none absolute top-1/2 left-1/2 h-[40rem] w-[40rem] -translate-x-1/2 -translate-y-1/2 text-[var(--color-brass-soft)] lg:h-[54rem] lg:w-[54rem]"
+        className="pointer-events-none absolute hidden sm:block top-1/2 left-1/2 h-[40rem] w-[40rem] -translate-x-1/2 -translate-y-1/2 text-[var(--color-brass-soft)] lg:h-[54rem] lg:w-[54rem]"
       />
       {/* Ambient warmth beneath the arc, so the group sits in light
           rather than floating on flat navy. */}

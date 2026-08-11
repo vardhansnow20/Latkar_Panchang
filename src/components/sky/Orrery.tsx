@@ -178,11 +178,11 @@ export function Orrery({ className }: { className?: string }) {
         {/* ── The outermost graduation ────────────────────────────
             One fine ring of degree marks, turning against the band so
             the whole figure never reads as a single rigid object. */}
-        <g className="turning" style={spin(420, true)} opacity="0.4">
+        <g className="turning hidden sm:block" style={spin(420, true)} opacity="0.4">
           <circle cx={C} cy={C} r="192" strokeWidth="0.5" fill="none" opacity="0.5" />
-          {Array.from({ length: 72 }, (_, i) => {
-            const deg = i * 5
-            const long = i % 6 === 0
+          {Array.from({ length: 36 }, (_, i) => {
+            const deg = i * 10
+            const long = i % 3 === 0
             const a = at(C, C, 192, deg)
             const b = at(C, C, long ? 183 : 187.5, deg)
             return (

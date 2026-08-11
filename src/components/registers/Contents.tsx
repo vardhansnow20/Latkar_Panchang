@@ -43,7 +43,7 @@ export function Contents() {
     <Register id="contents" tone="dawn" height="vast" className="overflow-hidden">
       <Figure
         name="chart" opacity={0.25}
-        className="pointer-events-none absolute -top-[6%] right-[-14%] h-[26rem] w-[39rem] text-[var(--ink-faint)] lg:h-[34rem] lg:w-[51rem]"
+        className="pointer-events-none absolute hidden sm:block -top-[6%] right-[-14%] h-[26rem] w-[39rem] text-[var(--ink-faint)] lg:h-[34rem] lg:w-[51rem]"
       />
 
       <m.div

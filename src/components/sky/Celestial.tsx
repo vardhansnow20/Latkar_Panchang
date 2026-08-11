@@ -219,10 +219,19 @@ export function StarField({ count = 40, className }: { count?: number; className
     // is not itself clipping. Containing it here fixes that everywhere
     // at once, and is safe — this box never wraps a sticky element.
     <div className={cn("pointer-events-none overflow-hidden", className)} aria-hidden="true">
-      {stars.map((s) => (
+      {stars.map((s, i) => (
         <span
           key={s.id}
-          className="star absolute rounded-full"
+          className={cn(
+            "star absolute rounded-full",
+            // Past the fortieth star the field is texture, not
+            // composition. Each one carries an infinite opacity
+            // animation and most carry a box-shadow glow, and on a
+            // phone that texture is paid for on every scrolled frame
+            // while being too fine to read. `display: none` costs
+            // nothing to paint, unlike a lowered opacity.
+            i >= 40 && "hidden sm:block"
+          )}
           style={
             {
               top: `${s.top}%`,

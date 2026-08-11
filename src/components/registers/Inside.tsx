@@ -49,7 +49,7 @@ export function Inside() {
       <Figure
         name="chart"
         opacity={0.2}
-        className="pointer-events-none absolute -top-[4%] -right-[16%] h-[26rem] w-[39rem] text-[var(--ink-faint)] lg:h-[34rem] lg:w-[51rem]"
+        className="pointer-events-none absolute hidden sm:block -top-[4%] -right-[16%] h-[26rem] w-[39rem] text-[var(--ink-faint)] lg:h-[34rem] lg:w-[51rem]"
       />
 
       <m.div

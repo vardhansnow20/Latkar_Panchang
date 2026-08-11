@@ -78,7 +78,7 @@ export function Opening() {
     <Register id="opening" tone="night" height="full" className="grain overflow-hidden" ref={ref}>
       {/* 1 — deep sky colour. */}
       <m.div
-        style={{ y: nebulaY, opacity: skyOpen }}
+        style={{ y: nebulaY, opacity: skyOpen, willChange: "transform, opacity" }}
         className="nebula pointer-events-none absolute -inset-x-[10%] -inset-y-[6%] opacity-70"
         aria-hidden="true"
       />
@@ -91,16 +91,19 @@ export function Opening() {
        * utility class outright. Putting the two on the same node
        * silently discards the hierarchy — which is exactly what
        * happened on the first attempt at this. */}
-      <m.div style={{ y: starsY, opacity: skyOpen }} className="absolute inset-0">
+      <m.div
+        style={{ y: starsY, opacity: skyOpen, willChange: "transform, opacity" }}
+        className="absolute inset-0"
+      >
         <div className="absolute inset-0 opacity-[0.5]">
-          <StarField count={120} className="absolute inset-0" />
+          <StarField count={96} className="absolute inset-0" />
         </div>
       </m.div>
       <ShootingStars className="absolute inset-0" />
 
       {/* 3 — the charted figure. */}
       <m.div
-        style={{ y: netY, opacity: netFade }}
+        style={{ y: netY, opacity: netFade, willChange: "transform, opacity" }}
         className="pointer-events-none absolute inset-x-0 top-[2svh] flex justify-center"
         aria-hidden="true"
       >
@@ -117,11 +120,11 @@ export function Opening() {
           figure is a fifth of the geometry, so it can carry more
           presence without competing. */}
       <m.div
-        style={{ y: labY, scale: labScale, opacity: midFade }}
+        style={{ y: labY, scale: labScale, opacity: midFade, willChange: "transform, opacity" }}
         className="pointer-events-none absolute inset-x-0 top-[47%] flex -translate-y-1/2 justify-center"
         aria-hidden="true"
       >
-        <div className="aspect-square w-[168vw] max-w-[62rem] opacity-[0.34] sm:w-[112vw] lg:w-[102svh]">
+        <div className="aspect-square w-[112vw] max-w-[62rem] opacity-[0.26] sm:w-[104vw] sm:opacity-[0.34] lg:w-[102svh]">
           <Orrery className="h-full w-full text-[var(--color-brass-soft)]" />
         </div>
       </m.div>
@@ -163,7 +166,7 @@ export function Opening() {
       </div>
 
       {/* 6 — near dust. */}
-      <m.div style={{ y: motesY }} className="pointer-events-none absolute inset-0" aria-hidden="true">
+      <m.div style={{ y: motesY, willChange: "transform" }} className="pointer-events-none absolute inset-0" aria-hidden="true">
         <MoteField count={22} className="absolute inset-0" />
       </m.div>
 
@@ -173,9 +176,9 @@ export function Opening() {
         initial="hidden"
         animate="visible"
         variants={sequence}
-        style={{ y: typeY, opacity: typeFade }}
+        style={{ y: typeY, opacity: typeFade, willChange: "transform, opacity" }}
       >
-        <m.div variants={rise} style={{ scale: moonScale, y: moonY }} className="mb-[clamp(0.75rem,3svh,2rem)]">
+        <m.div variants={rise} style={{ scale: moonScale, y: moonY, willChange: "transform" }} className="mb-[clamp(0.75rem,3svh,2rem)]">
           <MoonDisc className="w-[clamp(4.5rem,12svh,10rem)]" />
         </m.div>
 
