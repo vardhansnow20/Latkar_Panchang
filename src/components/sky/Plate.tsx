@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { cn } from "@/lib/utils"
 import type { ImageAsset } from "@/types/content"
 
@@ -141,7 +141,27 @@ export function Plate({
   className,
 }: PlateProps) {
   const [loaded, setLoaded] = useState(false)
+  const img = useRef<HTMLImageElement>(null)
   const { src, alt, aspectRatio } = image
+
+  /**
+   * Catch the image that finished loading before React was listening.
+   *
+   * The plate fades in from `opacity-0` on the img's `load` event. But
+   * a cached or already-decoded image can complete *before* the
+   * handler is attached, and then `load` never fires again — leaving
+   * the plate permanently invisible while the markup, the network
+   * request and the layout box all look perfectly healthy. It is
+   * intermittent by nature: it shows up on a warm cache, a fast
+   * connection, or a re-render, and hides on a cold load, which is
+   * exactly the kind of bug that gets reported as "sometimes the
+   * image isn't there".
+   *
+   * `complete` is the synchronous truth the event cannot give us.
+   */
+  useEffect(() => {
+    if (img.current?.complete) setLoaded(true)
+  }, [src])
 
   return (
     <div
@@ -173,10 +193,17 @@ export function Plate({
       >
         {src ? (
           <img
+            ref={img}
             src={src}
             alt={alt}
             loading="lazy"
+            decoding="async"
             onLoad={() => setLoaded(true)}
+            // If decoding fails there is nothing to fade in to, but a
+            // plate stuck at zero opacity is worse than a broken-image
+            // icon: it looks like a layout bug rather than a missing
+            // file. Fail visible.
+            onError={() => setLoaded(true)}
             className={cn(
               "h-full w-full transition-opacity duration-[var(--t-reveal)] ease-[var(--ease)]",
               maxHeight ? "object-contain" : "object-cover",
