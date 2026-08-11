@@ -1,4 +1,5 @@
 import type { NavLink, SocialLink } from "@/types/content"
+import { asset } from "@/lib/asset"
 
 /**
  * Site-wide constants — brand, navigation, footer, social. Nothing
@@ -16,7 +17,7 @@ export const site = {
   shortName: "Latkar Panchang",
   tagline: "Over 100 Years of Scripturally Accurate Tradition",
   logo: {
-    src: "/brand/logo-placeholder.svg", // TODO: swap for the real mark at the same path
+    src: asset("brand/logo-placeholder.svg"), // TODO: swap for the real mark at the same path
     alt: "Kolhapur Latkar Panchang",
   },
 } as const
@@ -34,6 +35,7 @@ export const navLinks: NavLink[] = [
   { label: "Publisher", href: "#compilers" },
   { label: "Archive", href: "#archive" },
   { label: "Calendar", href: "#calendar" },
+  { label: "App", href: "#almanac" },
   { label: "Contact", href: "#reach" },
 ]
 

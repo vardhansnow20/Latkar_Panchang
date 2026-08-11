@@ -72,16 +72,16 @@ export function Elements() {
         whileInView="visible"
         viewport={viewport}
         variants={rise}
-        className="relative mb-[var(--s-8)]"
+        className="relative mb-[var(--s-6)]"
       >
         <p className="tick mb-[var(--s-3)]">{elements.eyebrow}</p>
-        <h2 className="mb-[var(--s-4)] max-w-[16ch] text-chapter text-[var(--ink)]">
+        <h2 className="mb-[var(--s-4)] max-w-[16ch] text-register text-[var(--ink)]">
           {elements.heading}
         </h2>
         <Measure size="wide">
           {/* A drop cap, as a museum wall text would set it — the one
               place on the page type behaves like printed matter. */}
-          <p className="text-lead text-[var(--ink-soft)] [&::first-letter]:float-left [&::first-letter]:mt-[0.08em] [&::first-letter]:mr-[0.09em] [&::first-letter]:font-[family-name:var(--font-display)] [&::first-letter]:text-[3.4em] [&::first-letter]:leading-[0.78] [&::first-letter]:text-[var(--color-brass)]">
+          <p className="text-lead text-[var(--ink-soft)] [&::first-letter]:float-left [&::first-letter]:mt-[0.08em] [&::first-letter]:mr-[0.09em] [&::first-letter]:font-[family-name:var(--font-display)] [&::first-letter]:text-[3.4em] [&::first-letter]:leading-[0.78] [&::first-letter]:text-[var(--metal)]">
             {elements.definition}
           </p>
         </Measure>

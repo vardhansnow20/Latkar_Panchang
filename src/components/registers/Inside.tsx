@@ -57,7 +57,7 @@ export function Inside() {
         whileInView="visible"
         viewport={viewport}
         variants={rise}
-        className="relative mb-[var(--s-7)]"
+        className="relative mb-[var(--s-6)]"
       >
         <p className="tick mb-[var(--s-3)]">{insideEdition.eyebrow}</p>
         <h2 className="mb-[var(--s-4)] max-w-[16ch] text-chapter text-[var(--ink)]">
@@ -68,7 +68,7 @@ export function Inside() {
         </Measure>
       </m.div>
 
-      <div className="relative flex flex-col gap-[var(--s-8)]">
+      <div className="relative flex flex-col gap-[var(--s-6)]">
         {editionPlates.map((plate, i) => (
           <Exhibit key={plate.id} plate={plate} index={i} onOpen={() => setOpenIndex(i)} />
         ))}
@@ -187,7 +187,7 @@ function Exhibit({
       {plate.standout && (
         <span className="mt-[var(--s-5)] block border-t border-[var(--hairline)] pt-[var(--s-4)]">
           <span
-            className="block text-[clamp(1.25rem,2.4vw,1.9rem)] leading-none tracking-[0.02em] text-[var(--color-brass)] tabular-nums"
+            className="block text-[clamp(1.25rem,2.4vw,1.9rem)] leading-none tracking-[0.02em] text-[var(--metal)] tabular-nums"
             style={{ fontFamily: "var(--font-mono)" }}
           >
             {plate.standout.value}
@@ -235,7 +235,7 @@ function Exhibit({
       )}
 
       {layout === "ephemeris" && (
-        <div>
+        <div className="max-w-[58rem]">
           <m.div variants={unveil}>
             <MountedPage plate={plate} onOpen={onOpen} tilt={tilt} />
           </m.div>

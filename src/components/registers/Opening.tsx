@@ -187,9 +187,14 @@ export function Opening() {
           // them — without this the headline inherits body leading of
           // 1.72 and grows by ~160px.
           style={{
-            fontSize: "min(var(--text-chapter), 8svh)",
-            lineHeight: "var(--text-chapter--line-height)",
-            letterSpacing: "var(--text-chapter--letter-spacing)",
+            // Restated inline, not left to the utility: an inline
+            // fontSize bypasses the class that carries the matching
+            // line-height, and the headline then inherits body leading
+            // and grows past its container. The svh term is the guard
+            // that keeps a long headline inside a short viewport.
+            fontSize: "min(var(--text-hero), 14svh)",
+            lineHeight: "var(--text-hero--line-height)",
+            letterSpacing: "var(--text-hero--letter-spacing)",
           }}
         >
           {hero.heading}

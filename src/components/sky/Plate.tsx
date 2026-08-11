@@ -29,6 +29,11 @@ interface PlateProps {
   interactive?: boolean
   /** Board thickness. `none` gives a bare, unmounted image. */
   mount?: "none" | "thin" | "deep"
+  /** Hang the piece at a common height, letting the mount board make
+   * up the difference — which is how a wall of differently-proportioned
+   * pieces is actually framed. The image is contained rather than
+   * cropped, because an archival scan must never lose its edges. */
+  maxHeight?: string
   className?: string
 }
 
@@ -38,11 +43,101 @@ const MOUNT = {
   deep: "plate p-[var(--s-3)] sm:p-[var(--s-4)]",
 } as const
 
+/**
+ * The mount for a piece that has not arrived yet.
+ *
+ * This was the single worst thing on the page: a flat beige rectangle
+ * with a line of caption text floating in it, appearing seven times.
+ * It read as a broken image, and no amount of depth elsewhere could
+ * outweigh that.
+ *
+ * It is now what a conservator actually leaves in the frame — a
+ * laid-paper interleave with an engraved rosette at its centre,
+ * registration marks at the corners where the piece will be aligned,
+ * and the description set as a proper label between rules. Honest
+ * about being empty, and designed rather than defaulted.
+ */
+function AwaitingPlate({ label }: { label: string }) {
+  return (
+    <div className="relative flex h-full w-full items-center justify-center overflow-hidden px-[var(--s-4)] py-[var(--s-3)]">
+      {/* Laid paper — the fine parallel chain-lines of a hand-made
+          sheet, at a weight you feel rather than read. */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 opacity-[0.5]"
+        style={{
+          backgroundImage:
+            "repeating-linear-gradient(90deg, rgba(120,96,58,0.07) 0 1px, transparent 1px 7px), repeating-linear-gradient(0deg, rgba(120,96,58,0.04) 0 1px, transparent 1px 26px)",
+        }}
+      />
+
+      {/* The engraved rosette a blank plate carries at its centre. */}
+      <svg
+        aria-hidden="true"
+        viewBox="0 0 200 200"
+        className="pointer-events-none absolute h-[62%] max-h-[11rem] w-auto text-[var(--color-brass)] opacity-[0.16]"
+        fill="none"
+      >
+        <g stroke="currentColor" strokeWidth="0.7">
+          <circle cx="100" cy="100" r="72" />
+          <circle cx="100" cy="100" r="54" strokeWidth="0.4" />
+          <circle cx="100" cy="100" r="21" />
+          {Array.from({ length: 24 }, (_, i) => {
+            const a = ((i * 360) / 24 - 90) * (Math.PI / 180)
+            const long = i % 3 === 0
+            return (
+              <line
+                key={i}
+                x1={100 + 54 * Math.cos(a)}
+                y1={100 + 54 * Math.sin(a)}
+                x2={100 + (long ? 72 : 64) * Math.cos(a)}
+                y2={100 + (long ? 72 : 64) * Math.sin(a)}
+                strokeWidth={long ? 0.8 : 0.4}
+              />
+            )
+          })}
+        </g>
+      </svg>
+
+      {/* Registration marks — where the piece will be squared up. */}
+      <span aria-hidden="true" className="pointer-events-none absolute inset-[var(--s-3)]">
+        {[
+          "top-0 left-0 border-t border-l",
+          "top-0 right-0 border-t border-r",
+          "bottom-0 left-0 border-b border-l",
+          "bottom-0 right-0 border-b border-r",
+        ].map((pos) => (
+          <span
+            key={pos}
+            className={cn("absolute size-3 border-[var(--color-brass)]/40", pos)}
+          />
+        ))}
+      </span>
+
+      {/* The label, between rules, as a conservator's slip is set. */}
+      <span className="relative flex max-w-[34ch] flex-col items-center gap-[var(--s-2)] text-center">
+        <span className="h-px w-8 bg-[var(--color-brass)]/45" />
+        {/* Set without `.tick`, deliberately. That class carries
+            `color: var(--color-brass)`, and brass on the light
+            interleave measures 2.75:1 — the label was decoration
+            pretending to be text. Same voice, ink that can be read. */}
+        <span
+          className="font-[family-name:var(--font-mono)] text-[0.6875rem] leading-[1.7] tracking-[var(--tracking-widest)] text-[var(--color-ink-muted)] uppercase"
+        >
+          {label}
+        </span>
+        <span className="h-px w-8 bg-[var(--color-brass)]/45" />
+      </span>
+    </div>
+  )
+}
+
 export function Plate({
   image,
   glazed = false,
   interactive = false,
   mount = "thin",
+  maxHeight,
   className,
 }: PlateProps) {
   const [loaded, setLoaded] = useState(false)
@@ -62,9 +157,19 @@ export function Plate({
         className={cn(
           "relative overflow-hidden bg-[var(--color-paper-sunk)]",
           mount !== "none" && "plate-window rounded-[var(--radius-edge)]",
-          glazed && "glass"
+          glazed && "glass",
+          // An empty mount is a note that a piece is missing, not an
+          // exhibit. Left at full aspect, a landscape page awaiting
+          // photography became a blank field most of a screen tall and
+          // read as a broken layout. The cap goes on the box that
+          // carries the aspect ratio — capping an inner child does
+          // nothing, since the ratio still sets this element's height.
+          // An awaiting plate is designed, not broken — but it still
+          // must not swallow a screen. Held to a third of the viewport.
+          !src && "max-h-[24svh]",
+          !src && "bg-[color-mix(in_srgb,var(--color-paper-raised)_92%,var(--color-brass))]"
         )}
-        style={{ aspectRatio }}
+        style={{ aspectRatio, maxHeight }}
       >
         {src ? (
           <img
@@ -73,17 +178,13 @@ export function Plate({
             loading="lazy"
             onLoad={() => setLoaded(true)}
             className={cn(
-              "h-full w-full object-cover transition-opacity duration-[var(--t-reveal)] ease-[var(--ease)]",
+              "h-full w-full transition-opacity duration-[var(--t-reveal)] ease-[var(--ease)]",
+              maxHeight ? "object-contain" : "object-cover",
               loaded ? "opacity-100" : "opacity-0"
             )}
           />
         ) : (
-          /* No stock stand-in, ever — an empty mount reads honestly as
-             a piece not yet in the collection, and cannot be mistaken
-             for a design decision. */
-          <div className="flex h-full w-full items-center justify-center p-[var(--s-3)]">
-            <span className="tick text-center text-[var(--color-ink-faint)]">{alt}</span>
-          </div>
+          <AwaitingPlate label={alt} />
         )}
       </div>
     </div>

@@ -1,4 +1,5 @@
 import type { ImageAsset } from "@/types/content"
+import { asset } from "@/lib/asset"
 
 /**
  * Pages from the current edition, supplied by the client as two PDFs
@@ -52,8 +53,8 @@ const plate = (
   alt: string
 ): { image: ImageAsset; full: ImageAsset } => ({
   // Every page of this edition is landscape at the same proportion.
-  image: { src: `/editions/${slug}.webp`, alt, aspectRatio: 1853 / 1309 },
-  full: { src: `/editions/${slug}-full.webp`, alt, aspectRatio: 1853 / 1309 },
+  image: { src: asset(`editions/${slug}.webp`), alt, aspectRatio: 1853 / 1309 },
+  full: { src: asset(`editions/${slug}-full.webp`), alt, aspectRatio: 1853 / 1309 },
 })
 
 export const insideEdition = {
@@ -99,7 +100,7 @@ export const editionPlates: EditionPlate[] = [
       "Daily ephemeris page from the Shake 1947 edition, giving the positions of the Sun, Moon and planets for June 2025"
     ),
     detail: {
-      src: "/editions/ephemeris-detail.webp",
+      src: asset("editions/ephemeris-detail.webp"),
       alt: "Magnified detail of the ephemeris table, showing the planetary columns and their daily readings",
       aspectRatio: 1873 / 878,
     },

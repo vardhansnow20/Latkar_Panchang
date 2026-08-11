@@ -52,10 +52,34 @@
    * voice, the mono is used far more heavily now: an instrument is
    * covered in numbers, and numbers want a fixed advance.
    * --------------------------------------------------------------- */
-  --font-display: "Panchang Display", "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
-  --font-body: "Panchang Sans", ui-sans-serif, "Segoe UI", -apple-system, "Helvetica Neue", Arial, sans-serif;
-  --font-devanagari: "Panchang Devanagari", "Tiro Devanagari Sanskrit", "Noto Serif Devanagari", serif;
-  --font-mono: ui-monospace, "Cascadia Mono", "SF Mono", Consolas, monospace;
+  /* ── Type ────────────────────────────────────────────────────────
+   * No licensed face has been supplied, so these stacks are the real
+   * typography rather than a placeholder for it. They are built to
+   * land on a genuinely good serif on every common platform instead
+   * of falling through to Georgia, which is what was happening.
+   *
+   * Display — the almanac voice. Iowan Old Style and Hoefler Text are
+   * the best display serifs on Apple platforms; Constantia is the
+   * strongest on Windows and is deliberately placed ahead of Georgia,
+   * which is a screen face with a large x-height and reads as a blog
+   * at headline size.
+   *
+   * Body — set in a serif now, not a UI sans. An almanac is printed
+   * matter, and a sans body was quietly undoing the museum register
+   * everywhere else on the page. Charter and Sitka Text are both
+   * designed for continuous reading at small sizes and both ship
+   * widely; Source Serif and Cambria catch the rest.
+   *
+   * The sans survives only for interface furniture. */
+  --font-display: "Panchang Display", "Iowan Old Style", "Hoefler Text", "Sorts Mill Goudy",
+    Constantia, "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+  --font-body: "Panchang Text", Charter, "Bitstream Charter", "Sitka Text", "Source Serif 4",
+    "Source Serif Pro", Cambria, "Iowan Old Style", Georgia, serif;
+  --font-ui: ui-sans-serif, "Inter", "Segoe UI Variable Text", "Segoe UI", -apple-system,
+    "Helvetica Neue", Arial, sans-serif;
+  --font-devanagari: "Panchang Devanagari", "Tiro Devanagari Sanskrit", "Noto Serif Devanagari",
+    "Nirmala UI", serif;
+  --font-mono: ui-monospace, "Cascadia Mono", "SF Mono", "Roboto Mono", Consolas, monospace;
 
   --font-weight-regular: 400;
   --font-weight-medium: 500;
@@ -77,20 +101,44 @@
   --text-tick--letter-spacing: var(--tracking-widest);
 
   --text-note: 0.8125rem; /* 13px — captions, museum labels */
-  --text-note--line-height: 1.6;
+  --text-note--line-height: 1.52;
 
   --text-body: 1.0625rem; /* 17px — reading size */
-  --text-body--line-height: 1.72;
+  --text-body--line-height: 1.6;
 
-  --text-lead: clamp(1.1875rem, 1.1rem + 0.4vw, 1.4375rem); /* 19–23px */
+  --text-lead: clamp(1.125rem, 1.06rem + 0.32vw, 1.3125rem); /* 18–21px */
   --text-lead--line-height: 1.55;
 
-  --text-title: clamp(1.625rem, 1.4rem + 1.1vw, 2.375rem); /* 26–38px */
+  --text-title: clamp(1.5rem, 1.28rem + 1.05vw, 2.25rem); /* 24–36px */
   --text-title--line-height: 1.24;
 
-  --text-chapter: clamp(2.5rem, 1.9rem + 3vw, 4.5rem); /* 40–72px */
-  --text-chapter--line-height: 1.02;
+  --text-chapter: clamp(2.75rem, 1.9rem + 4vw, 5rem); /* 44–80px */
+  --text-chapter--line-height: 1.05;
   --text-chapter--letter-spacing: var(--tracking-tight);
+
+  /* The hero, which needs a step of its own.
+   *
+   * The headline was previously set at --text-chapter and capped at
+   * 8svh, which on any ordinary desktop made it *smaller* than every
+   * section heading beneath it — the page's title carried less weight
+   * than "Explore the Panchang". A masthead has to out-rank the
+   * chapters it introduces, so it gets its own step above them. */
+  --text-hero: clamp(3.5rem, 2rem + 6.4vw, 8rem); /* 56–128px */
+  --text-hero--line-height: 1.0;
+  --text-hero--letter-spacing: -0.026em;
+
+  /* A second heading rank, below chapter.
+   *
+   * Thirteen registers all opening at chapter scale meant nothing on
+   * the page was subordinate to anything else — the eye had no way to
+   * tell a main movement from the material supporting it, which is
+   * what made a long scroll read as an undifferentiated list. The
+   * major registers (the history, the edition, the trust, the
+   * archive, the calendar) keep chapter; the registers that explain
+   * or close take this. */
+  --text-register: clamp(1.875rem, 1.4rem + 2.3vw, 3.125rem); /* 30–50px */
+  --text-register--line-height: 1.14;
+  --text-register--letter-spacing: -0.012em;
 
   --text-epoch: clamp(4.5rem, 2rem + 12vw, 13rem); /* 72–208px */
   --text-epoch--line-height: 0.84;
@@ -103,12 +151,42 @@
   --radius-edge: 2px;
 
   /* ---------------------------------------------------------------
-   * Depth — no warm paper-lift shadows any more. Objects here sit in
-   * air against a sky, so shadows are large, soft, and cool, and
-   * there are only two: resting and raised.
+   * Depth.
+   *
+   * Rebuilt after measuring the two reference sites, which were doing
+   * three things this build was not:
+   *
+   *   1. Throwing shadows far further and darker — 0 48px 64px -32px
+   *      at 0.35 alpha, against the 0 18px 44px -20px at 0.30 here.
+   *      Half the "flatness" was simply under-powered shadow.
+   *   2. Stacking a *solid, unblurred* offset beneath each surface, so
+   *      a panel visibly rests on a second sheet rather than floating.
+   *      That one trick is most of what reads as physical.
+   *   3. Ringing every surface with a hairline of gold at 12–16%
+   *      alpha — on one reference, 78 separate elements carried it.
+   *      It is what makes a panel read as gilded rather than as a div.
+   *
+   * All three are folded in below. Order matters: rim first so it sits
+   * tight against the edge, then the sheet, then the cast shadow.
    * --------------------------------------------------------------- */
-  --depth-rest: 0 2px 6px rgba(20, 24, 40, 0.10), 0 18px 44px -20px rgba(20, 24, 40, 0.30);
-  --depth-lift: 0 6px 16px rgba(20, 24, 40, 0.14), 0 40px 90px -32px rgba(20, 24, 40, 0.42);
+  --rim-gold: 0 0 0 1px rgba(217, 201, 163, 0.18);
+  --rim-gold-strong: 0 0 0 1px rgba(217, 201, 163, 0.34);
+
+  --depth-rest:
+    var(--rim-gold),
+    0 14px 0 -6px rgba(60, 50, 34, 0.16),
+    0 4px 10px rgba(20, 24, 40, 0.16),
+    0 34px 56px -26px rgba(20, 24, 40, 0.45);
+  --depth-lift:
+    var(--rim-gold-strong),
+    0 20px 0 -7px rgba(60, 50, 34, 0.20),
+    0 10px 22px rgba(20, 24, 40, 0.20),
+    0 56px 80px -34px rgba(20, 24, 40, 0.55);
+
+  /* A held gold halo, for the few things that should look lit rather
+   * than merely present. Measured off the astrology reference, which
+   * used a tight 6px glow at high alpha rather than a wide soft one. */
+  --glow-gold: 0 0 18px 1px rgba(217, 201, 163, 0.45);
 
   --breakpoint-sm: 30rem;
   --breakpoint-md: 48rem;
@@ -123,14 +201,22 @@
  * pixel guess.
  * ----------------------------------------------------------------- */
 :root {
+  /* Density.
+   *
+   * The page ran ~29,000px for eleven photographs, four document pages
+   * and one calendar. Length without material is exactly what reads as
+   * "information pasted on a page": the eye travels a long way between
+   * things worth looking at. The three largest steps are pulled in by
+   * roughly a third, which tightens every section gap on the site at
+   * once without touching a single layout. */
   --s-1: clamp(0.25rem, 0.24rem + 0.05vw, 0.375rem);
   --s-2: clamp(0.5rem, 0.47rem + 0.15vw, 0.75rem);
   --s-3: clamp(0.875rem, 0.8rem + 0.3vw, 1.25rem);
   --s-4: clamp(1.375rem, 1.2rem + 0.7vw, 2rem);
   --s-5: clamp(2.125rem, 1.8rem + 1.4vw, 3.25rem);
-  --s-6: clamp(3.25rem, 2.6rem + 2.6vw, 5.25rem);
-  --s-7: clamp(5rem, 3.8rem + 5vw, 8.5rem);
-  --s-8: clamp(7.5rem, 5.2rem + 9.5vw, 14rem);
+  --s-6: clamp(2.75rem, 2.2rem + 2.1vw, 4.25rem);
+  --s-7: clamp(3.75rem, 2.9rem + 3.6vw, 6.25rem);
+  --s-8: clamp(5.25rem, 3.8rem + 6.4vw, 9.5rem);
 
   /* The page's side margin, and the width the degree rule occupies
    * inside it. Content never enters the rule's channel. */

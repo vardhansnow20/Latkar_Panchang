@@ -56,7 +56,7 @@ export function Trust() {
         whileInView="visible"
         viewport={viewport}
         variants={rise}
-        className="relative mb-[var(--s-7)]"
+        className="relative mb-[var(--s-6)]"
       >
         <p className="tick mb-[var(--s-3)]">{trustJourney.eyebrow}</p>
         <h2 className="mb-[var(--s-4)] max-w-[16ch] text-chapter text-[var(--ink)]">
@@ -116,7 +116,7 @@ function Stage({
       whileInView="visible"
       viewport={viewport}
       variants={sequence}
-      className={cn("relative pl-[var(--s-5)] lg:pl-[var(--s-6)]", !last && "pb-[var(--s-7)]")}
+      className={cn("relative pl-[var(--s-5)] lg:pl-[var(--s-6)]", !last && "pb-[var(--s-5)]")}
     >
       {/* The node this stage occupies on the thread. */}
       <m.span
@@ -151,10 +151,16 @@ function Stage({
               variants={unveilSide}
               className="mt-[var(--s-4)] w-[64%] max-w-[15rem] lg:order-1 lg:mt-0 lg:w-[17rem] lg:max-w-none lg:shrink-0"
             >
+              {/* Hung at a common height. Seven stages whose plates
+                  each kept their own proportion made the thread run
+                  far longer than the writing on it justified, and a
+                  journey should read as one movement rather than
+                  seven differently-sized stops. */}
               <Plate
                 image={photo.image}
                 mount={isDocument ? "deep" : "thin"}
                 glazed={isDocument}
+                maxHeight="11rem"
                 interactive
               />
               <figcaption className="mt-[var(--s-2)] text-note text-[var(--ink-faint)]">
@@ -192,7 +198,7 @@ export function Compilers() {
         className="mb-[var(--s-5)]"
       >
         <p className="tick mb-[var(--s-3)]">{about.eyebrow}</p>
-        <h2 className="max-w-[16ch] text-chapter text-[var(--ink)]">{about.heading}</h2>
+        <h2 className="max-w-[18ch] text-register text-[var(--ink)]">{about.heading}</h2>
       </m.div>
 
       <div className="lg:flex lg:gap-[var(--s-6)]">

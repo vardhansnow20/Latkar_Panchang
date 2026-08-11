@@ -34,6 +34,11 @@ const DAY_TO_NIGHT = ["#f2e6cd", "#c98f80", "#7d5a78", "#2b3050"] as const
 
 export function SkyCalibration() {
   useEffect(() => {
+    /** Document height at the last rebuild. The horizons are expressed
+     * as percentages of the document, so any change to its height
+     * invalidates them. */
+    let lastHeight = 0
+
     const build = () => {
       // Never recalibrate while a modal is open.
       //
@@ -49,8 +54,9 @@ export function SkyCalibration() {
 
       const meridian = document.getElementById("meridian")
       const dusk = document.getElementById("dusk")
-      const docH = document.body.scrollHeight
+      const docH = document.documentElement.scrollHeight
       if (!meridian || !dusk || docH <= 0) return
+      lastHeight = docH
 
       const span = (el: HTMLElement) => ({
         from: (el.offsetTop / docH) * 100,
@@ -95,23 +101,66 @@ export function SkyCalibration() {
         `#10162a 100%`,
       ]
 
-      document.body.style.backgroundImage = `linear-gradient(180deg, ${stops.join(", ")})`
+      // The light source is re-applied with every rebuild. Writing
+      // only the ramp here would silently drop it, since this
+      // assignment replaces the whole property.
+      const lightSource =
+        "radial-gradient(120% 55% at 28% 6%, rgba(255,246,222,0.13) 0%, rgba(255,246,222,0.05) 38%, transparent 68%)"
+      document.body.style.backgroundImage = `${lightSource}, linear-gradient(180deg, ${stops.join(", ")})`
     }
 
     build()
 
-    // Section heights depend on viewport height (several bands are
-    // sized in svh) and on images settling, so recalibrate on both.
+    /**
+     * Rebuild only when the document's height has actually changed.
+     *
+     * This is the part that was missing, and it mattered: the first
+     * build runs before the page's lazy images have loaded, so the
+     * horizons were pinned against a document several thousand pixels
+     * shorter than the final one. Measured on a cold load, the sunrise
+     * landed at 32.5% while Meridian sat at 41.4% — which put the
+     * whole Contents register, light ink and all, on the warm morning
+     * sky at 1.48:1. The bug was invisible on a warm reload, because
+     * cached images settle before the first measurement.
+     *
+     * The ResizeObserver alone did not catch it: it was watching
+     * document.body, whose observed box does not track the growth of
+     * the scrollable document reliably.
+     */
+    const check = () => {
+      if (document.documentElement.scrollHeight !== lastHeight) build()
+    }
+
     const onResize = () => build()
     window.addEventListener("resize", onResize)
-    window.addEventListener("load", build)
-    const observer = new ResizeObserver(build)
-    observer.observe(document.body)
+    window.addEventListener("load", check)
+    // Capture phase, because `load` from an <img> does not bubble.
+    document.addEventListener("load", check, true)
+    document.fonts?.ready.then(check).catch(() => {})
+
+    const observer = new ResizeObserver(check)
+    observer.observe(document.documentElement)
+
+    // A short backstop for anything the events above miss — late
+    // fonts, web-font metrics, content that settles after paint. It
+    // stops itself once the height has held steady.
+    let settled = 0
+    const poll = window.setInterval(() => {
+      const h = document.documentElement.scrollHeight
+      if (h === lastHeight) {
+        if (++settled >= 8) window.clearInterval(poll)
+      } else {
+        settled = 0
+        build()
+      }
+    }, 250)
 
     return () => {
       window.removeEventListener("resize", onResize)
-      window.removeEventListener("load", build)
+      window.removeEventListener("load", check)
+      document.removeEventListener("load", check, true)
       observer.disconnect()
+      window.clearInterval(poll)
     }
   }, [])
 

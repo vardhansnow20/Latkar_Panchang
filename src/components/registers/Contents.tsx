@@ -1,5 +1,6 @@
 import { m } from "framer-motion"
 import { Register, Measure } from "@/components/sky/Register"
+import { Gallery } from "@/components/sky/Gallery"
 import { Plate } from "@/components/sky/Plate"
 import { Figure } from "@/components/sky/Celestial"
 import {
@@ -10,7 +11,7 @@ import {
   calendarPageImage,
   latestEditionImage,
 } from "@/data/explore"
-import { rise, unveil, unveilSide, sequence, viewport } from "@/lib/motion"
+import { rise, sequence, viewport } from "@/lib/motion"
 
 /**
  * What the book actually contains, opened one page at a time.
@@ -25,6 +26,18 @@ import { rise, unveil, unveilSide, sequence, viewport } from "@/lib/motion"
  * client, so each carries its caption as the load-bearing element —
  * the sequence reads as a described walk-through either way.
  */
+/** The seven pieces in the order a reader meets them: the cover, the
+ * detail, the three interior page types, a full month, and the
+ * edition on the shelf today. Assembled from the existing data so
+ * captions and alt text keep their single source. */
+const pageWalk = [
+  { id: "reveal", image: revealImage.image, caption: revealImage.caption, mount: "deep" as const },
+  { id: "close-up", image: closeUpImage.image, caption: closeUpImage.caption, mount: "thin" as const },
+  ...interiorPages.map((p) => ({ id: p.id, image: p.image, caption: p.caption, mount: "thin" as const })),
+  { id: "calendar-page", image: calendarPageImage.image, caption: calendarPageImage.caption, mount: "deep" as const },
+  { id: "latest", image: latestEditionImage.image, caption: latestEditionImage.caption, mount: "deep" as const },
+]
+
 export function Contents() {
   return (
     <Register id="contents" tone="dawn" height="vast" className="overflow-hidden">
@@ -38,10 +51,10 @@ export function Contents() {
         whileInView="visible"
         viewport={viewport}
         variants={rise}
-        className="relative mb-[var(--s-7)]"
+        className="relative mb-[var(--s-6)]"
       >
         <p className="tick mb-[var(--s-3)]">{explore.eyebrow}</p>
-        <h2 className="mb-[var(--s-3)] max-w-[16ch] text-chapter text-[var(--ink)]">
+        <h2 className="mb-[var(--s-3)] max-w-[16ch] text-register text-[var(--ink)]">
           {explore.heading}
         </h2>
         <Measure size="wide">
@@ -49,105 +62,35 @@ export function Contents() {
         </Measure>
       </m.div>
 
-      {/* First glimpse — tall, held alone. */}
-      <div className="relative mb-[var(--s-8)] lg:flex lg:items-end lg:gap-[var(--s-6)]">
-        <m.div
-          initial="hidden"
-          whileInView="visible"
-          viewport={viewport}
-          variants={unveil}
-          className="w-[72%] max-w-[24rem] lg:w-[34%] lg:max-w-none"
-        >
-          <Plate image={revealImage.image} mount="deep" />
-        </m.div>
-        <m.p
-          initial="hidden"
-          whileInView="visible"
-          viewport={viewport}
-          variants={rise}
-          className="mt-[var(--s-4)] max-w-[22ch] text-title text-[var(--ink)] lg:mt-0 lg:mb-[var(--s-4)]"
-          style={{ fontFamily: "var(--font-display)" }}
-        >
-          {revealImage.caption}
-        </m.p>
-      </div>
+      {/* ── The walk ───────────────────────────────────────────────
+          Seven plates, in narrative order, hung as one run.
 
-      {/* The detail — deliberately the smallest plate in the sequence,
-          hung out in the margin. */}
-      <div className="mb-[var(--s-8)] lg:flex lg:justify-end">
-        <m.div
-          initial="hidden"
-          whileInView="visible"
-          viewport={viewport}
-          variants={unveilSide}
-          className="w-[38%] max-w-[11rem]"
-        >
-          <Plate image={closeUpImage.image} mount="thin" />
-          <p className="mt-[var(--s-2)] text-note text-[var(--ink-soft)]">
-            {closeUpImage.caption}
-          </p>
-        </m.div>
-      </div>
-
-      {/* The three page types, in a row at equal weight — the one
-          moment in the sequence where repetition is the point, since
-          these three genuinely are peers. */}
+          This was five stacked blocks of deliberately varied scale,
+          and the variety was real design — but it cost three screens
+          to show seven pieces, every one of them still an empty
+          mount. The section describes itself as a walk through the
+          pages, and a walk is horizontal. Read left to right it is
+          the same sequence, at a fifth of the height, and the
+          captions now carry it as one continuous description rather
+          than five captions separated by a screen of air each. */}
       <m.div
         initial="hidden"
         whileInView="visible"
         viewport={viewport}
         variants={sequence}
-        className="mb-[var(--s-8)] grid gap-[var(--s-4)] sm:grid-cols-3 sm:gap-[var(--s-5)]"
+        className="relative"
       >
-        {interiorPages.map((page) => (
-          <m.figure key={page.id} variants={rise}>
-            <Plate image={page.image} mount="thin" />
-            <figcaption className="mt-[var(--s-3)] text-note text-[var(--ink-soft)]">
-              {page.caption}
-            </figcaption>
-          </m.figure>
-        ))}
+        <Gallery label={explore.heading} itemWidth="clamp(12rem, 21vw, 17rem)">
+          {pageWalk.map((page) => (
+            <m.figure key={page.id} variants={rise}>
+              <Plate image={page.image} mount={page.mount} maxHeight="15rem" />
+              <figcaption className="mt-[var(--s-3)] text-note text-[var(--ink-soft)]">
+                {page.caption}
+              </figcaption>
+            </m.figure>
+          ))}
+        </Gallery>
       </m.div>
-
-      {/* A full month, given the width it describes. */}
-      <div className="mb-[var(--s-8)]">
-        <m.div initial="hidden" whileInView="visible" viewport={viewport} variants={unveil}>
-          <Plate image={calendarPageImage.image} mount="deep" />
-        </m.div>
-        <m.p
-          initial="hidden"
-          whileInView="visible"
-          viewport={viewport}
-          variants={rise}
-          className="mt-[var(--s-3)] text-note text-[var(--ink-soft)]"
-        >
-          {calendarPageImage.caption}
-        </m.p>
-      </div>
-
-      {/* The edition on the shelf today — the sequence closes on the
-          object it opened with, now at full height. */}
-      <div className="lg:flex lg:items-end lg:gap-[var(--s-6)]">
-        <m.p
-          initial="hidden"
-          whileInView="visible"
-          viewport={viewport}
-          variants={rise}
-          className="mb-[var(--s-4)] max-w-[14ch] text-title text-[var(--ink)] lg:mb-[var(--s-5)]"
-          style={{ fontFamily: "var(--font-display)" }}
-        >
-          {latestEditionImage.caption}
-        </m.p>
-        <m.div
-          initial="hidden"
-          whileInView="visible"
-          viewport={viewport}
-          variants={unveil}
-          className="w-[66%] max-w-[22rem] lg:w-[30%] lg:max-w-none"
-        >
-          <Plate image={latestEditionImage.image} mount="deep" />
-        </m.div>
-      </div>
     </Register>
   )
 }

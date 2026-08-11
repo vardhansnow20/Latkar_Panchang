@@ -1,0 +1,41 @@
+# Netlify build configuration.
+#
+# The `base` in vite.config.ts keys off the NETLIFY environment
+# variable, which Netlify sets during its own builds, so this deploys
+# at the domain root while the GitHub Pages build keeps its subpath.
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  # Vite 8 requires a modern Node; Netlify's default image can lag
+  # behind it. Pinned to match local development.
+  NODE_VERSION = "22"
+
+# A single page with in-document anchors, but deep links and refreshes
+# should still resolve rather than 404.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Vite fingerprints everything under /assets, so those are immutable.
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# The archive scans and edition plates are stable, but not
+# fingerprinted — cache them hard, with revalidation.
+[[headers]]
+  for = "/*.webp"
+  [headers.values]
+    Cache-Control = "public, max-age=604800, must-revalidate"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    X-Frame-Options = "SAMEORIGIN"

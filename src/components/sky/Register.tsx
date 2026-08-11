@@ -32,9 +32,9 @@ const HEIGHT = {
    * and its action fell below the fold on a laptop. */
   full: "min-h-[100svh] py-[var(--s-4)]",
   /** A room of its own: the archive, the calendar reveal. */
-  vast: "py-[var(--s-8)]",
+  vast: "py-[var(--s-7)]",
   /** The standard chapter. */
-  open: "py-[var(--s-7)]",
+  open: "py-[var(--s-6)]",
   /** Follows hard on the band above rather than announcing itself. */
   close: "py-[var(--s-5)]",
 } as const

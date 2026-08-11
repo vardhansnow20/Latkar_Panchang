@@ -33,6 +33,15 @@
     color: var(--ink);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+    /* Real typographic settings, now that the body is set in a serif.
+       `font-synthesis` off matters most: without it a browser that
+       lacks a true medium will smear a faux-bold across the display
+       face, which is the single most obvious tell of unset type. */
+    font-optical-sizing: auto;
+    font-synthesis-weight: none;
+    font-synthesis-style: none;
+    font-variant-ligatures: common-ligatures contextual;
+    font-kerning: normal;
 
     /* The sunrise.
      *
@@ -60,7 +69,21 @@
      *
      * If a register's height changes materially, re-measure the band
      * boundaries and move these stops with them. */
-    background-image: linear-gradient(
+    /* A light source, over the sunrise.
+     *
+     * Both reference sites lit their page from a point — an off-centre
+     * radial highlight — rather than washing it with a flat ramp. A
+     * linear gradient alone has no origin, and that is a large part of
+     * why a long page of it reads as printed background rather than as
+     * air. Painted first so it sits above the ramp beneath. */
+    background-image:
+      radial-gradient(
+        120% 55% at 28% 6%,
+        rgba(255, 246, 222, 0.13) 0%,
+        rgba(255, 246, 222, 0.05) 38%,
+        transparent 68%
+      ),
+      linear-gradient(
       180deg,
       #10162a 0%,
       var(--color-indigo) 8%,
@@ -92,9 +115,14 @@
   h2,
   h3 {
     font-family: var(--font-display);
-    font-weight: var(--font-weight-medium);
+    font-weight: var(--font-weight-regular);
     color: var(--ink);
     text-wrap: balance;
+    /* Display serifs carry their weight in the drawing, not the mass.
+       Set at regular with discretionary ligatures and slight negative
+       tracking, which is how these faces are cut to be set large. */
+    font-variant-ligatures: common-ligatures discretionary-ligatures;
+    letter-spacing: var(--tracking-tight);
   }
 
   p {
@@ -136,13 +164,15 @@
    * component decision.
    * --------------------------------------------------------------- */
   .tone-night {
+    --metal: var(--color-brass-soft);
     --ink: #f2eee2;
     --ink-soft: #b9b7c4;
-    --ink-faint: #7d7f92;
+    --ink-faint: #8b8da0;
     --hairline: rgba(242, 238, 226, 0.18);
   }
 
   .tone-dawn {
+    --metal: var(--color-brass-soft);
     --ink: #f6f2e8;
     --ink-soft: #ded5cd;
     --ink-faint: #b3a79f;
@@ -154,9 +184,13 @@
      would — measured against the gradient at this height, the softer
      value this started at fell to 2.8:1 for body copy. */
   .tone-morning {
+    /* The hardest band on the page: the sky is mid-value here,
+       and brass measured 1.28:1 against it. A deep antique brass
+       keeps the metal reading while clearing 4.5. */
+    --metal: #4a3a20;
     --ink: #241c14;
     --ink-soft: #3b2f24;
-    --ink-faint: #574636;
+    --ink-faint: #453427;
     --hairline: rgba(36, 28, 20, 0.22);
   }
 
@@ -165,6 +199,7 @@
      `--color-ink-muted`: against the warmest part of the afternoon
      that token measured 4.51:1, which passes but leaves no margin. */
   .tone-day {
+    --metal: #6a4f24;
     --ink: var(--color-ink);
     --ink-soft: #5d5042;
     --ink-faint: #7d6e5c;
@@ -184,7 +219,10 @@
     font-size: var(--text-tick);
     letter-spacing: var(--tracking-widest);
     text-transform: uppercase;
-    color: var(--color-brass);
+    /* Tone-owned, with brass as the fallback for any tick that sits
+       outside a toned register. A fixed brass here failed contrast on
+       52 labels across the warm half of the sky. */
+    color: var(--metal, var(--color-brass));
   }
 
   /* ---------------------------------------------------------------
@@ -192,11 +230,54 @@
    * card: a plate mounted in an instrument. Board, a bevel-cut
    * window, and the shadow of something standing off its backing.
    * --------------------------------------------------------------- */
+  /* A mounted piece. The board carries a gold rim, a solid sheet
+     offset beneath it, and a far-thrown cast shadow — the three
+     together are what make it read as an object resting on something
+     rather than an image placed on a background. */
   .plate {
     background-color: var(--color-paper-raised);
     box-shadow:
       inset 0 0 0 1px rgba(176, 141, 87, 0.35),
       var(--depth-rest);
+  }
+
+  /* ── Surfaces ────────────────────────────────────────────────────
+     The page had no material anywhere except its plates: every block
+     of content sat directly on the sky, which is the single biggest
+     reason it read as information on a page rather than as objects in
+     a room. This is the substrate those blocks can rest on — a warm
+     panel, a gold hairline, and real depth — without touching any
+     content or layout. */
+  .surface {
+    background:
+      linear-gradient(
+        168deg,
+        color-mix(in srgb, var(--color-paper-raised) 10%, transparent) 0%,
+        color-mix(in srgb, var(--color-paper-raised) 4%, transparent) 46%,
+        transparent 100%
+      );
+    box-shadow: var(--depth-rest);
+    backdrop-filter: blur(3px);
+  }
+
+  /* The same, inverted for the daylight half of the page, where a
+     pale wash would disappear into paper. */
+  .surface-day {
+    background:
+      linear-gradient(
+        168deg,
+        rgba(255, 253, 246, 0.62) 0%,
+        rgba(255, 253, 246, 0.34) 46%,
+        rgba(255, 253, 246, 0.12) 100%
+      );
+    box-shadow: var(--depth-rest);
+    backdrop-filter: blur(3px);
+  }
+
+  /* A gilded hairline on its own, for edges that want the rim without
+     the weight of a full surface. */
+  .rim {
+    box-shadow: var(--rim-gold);
   }
 
   .plate-window {

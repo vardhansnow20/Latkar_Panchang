@@ -3,6 +3,7 @@ import { Menu, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { site, navLinks } from "@/data/site"
 import { Moon } from "@/components/sky/Celestial"
+import { onScrollFrame } from "@/lib/onScroll"
 
 /**
  * The house mark: a sun-and-degree rosette, which is the shape an
@@ -59,20 +60,33 @@ function Sunburst({ className }: { className?: string }) {
  * this build is organised around. Legibility comes from a blur and
  * the tone of the register underneath.
  */
+/** Where the masthead samples the tone beneath it — just below its own
+ * bottom edge, so it reads the register it is actually overlapping. */
+const MASTHEAD_LINE = 48
+
 export function Masthead() {
   const [scrolled, setScrolled] = useState(false)
   const [open, setOpen] = useState(false)
   const [current, setCurrent] = useState<string | null>(null)
   const [progress, setProgress] = useState(0)
+  /** The tone of whatever register is currently passing beneath the
+   * masthead. The header is fixed and paints no background, so its ink
+   * has to be borrowed from the sky behind it — without this it held
+   * the dark default at every position and the wordmark sat at 1.05:1
+   * against the night sky in the hero. */
+  const [tone, setTone] = useState("tone-night")
 
   const ids = useMemo(() => navLinks.map((l) => l.href.replace(/^#/, "")), [])
 
   useEffect(() => {
     const read = () => {
-      setScrolled(window.scrollY > 80)
+      const isScrolled = window.scrollY > 80
+      setScrolled((prev) => (prev === isScrolled ? prev : isScrolled))
       const doc = document.documentElement
       const scrollable = doc.scrollHeight - doc.clientHeight
-      setProgress(scrollable > 0 ? Math.min(Math.max(window.scrollY / scrollable, 0), 1) : 0)
+      const p = scrollable > 0 ? Math.min(Math.max(window.scrollY / scrollable, 0), 1) : 0
+      // Quantised — the nav moon is 17px across.
+      setProgress((prev) => (Math.abs(prev - p) < 0.004 ? prev : p))
       const line = document.documentElement.clientHeight / 3
       let found: string | null = null
       for (const id of ids) {
@@ -82,21 +96,34 @@ export function Masthead() {
         if (box.top <= line && box.bottom > line) found = id
       }
       setCurrent(found)
+
+      // Tone of the register crossing the masthead's own baseline.
+      let beneath: string | null = null
+      for (const el of document.querySelectorAll("section")) {
+        const box = el.getBoundingClientRect()
+        if (box.top <= MASTHEAD_LINE && box.bottom > MASTHEAD_LINE) {
+          const t = [...el.classList].find((c) => c.startsWith("tone-"))
+          if (t) beneath = t
+        }
+      }
+      if (beneath) setTone((prev) => (prev === beneath ? prev : beneath))
     }
-    read()
-    window.addEventListener("scroll", read, { passive: true })
-    window.addEventListener("resize", read)
-    return () => {
-      window.removeEventListener("scroll", read)
-      window.removeEventListener("resize", read)
-    }
+    return onScrollFrame(read)
   }, [ids])
+
+  const dark = tone === "tone-night" || tone === "tone-dawn"
 
   return (
     <header
       className={cn(
         "fixed inset-x-0 top-0 z-40 transition-[backdrop-filter,background-color] duration-[var(--t-reveal)]",
-        scrolled && "bg-[color-mix(in_srgb,var(--color-indigo)_18%,transparent)] backdrop-blur-md"
+        tone,
+        // The scrim has to follow the tone too: an indigo veil under
+        // dark ink is the same mistake in the other direction.
+        scrolled &&
+          (dark
+            ? "bg-[color-mix(in_srgb,var(--color-indigo)_22%,transparent)] backdrop-blur-md"
+            : "bg-[color-mix(in_srgb,var(--color-paper)_34%,transparent)] backdrop-blur-md")
       )}
     >
       <div className="mx-auto flex w-full max-w-[var(--frame)] items-center justify-between gap-[var(--s-5)] px-[var(--gutter)] py-[var(--s-3)] sm:pl-[calc(var(--gutter)+var(--rule-channel))]">
@@ -108,7 +135,7 @@ export function Masthead() {
           className="group/mark -my-[var(--s-2)] flex items-center gap-[var(--s-3)] py-[var(--s-2)]"
           aria-label={`${site.name} — top`}
         >
-          <Sunburst className="size-7 shrink-0 text-[var(--color-brass)] transition-transform duration-[1.4s] ease-[var(--ease)] group-hover/mark:rotate-45 sm:size-8" />
+          <Sunburst className="size-7 shrink-0 text-[var(--metal)] transition-transform duration-[1.4s] ease-[var(--ease)] group-hover/mark:rotate-45 sm:size-8" />
           <span className="flex flex-col leading-none">
             <span
               className="text-[0.95rem] leading-[1.16] tracking-[0.13em] text-[var(--ink)] uppercase sm:text-[1.05rem]"
@@ -122,7 +149,7 @@ export function Masthead() {
             >
               Panchang
             </span>
-            <span className="mt-[3px] text-[0.5rem] tracking-[0.34em] text-[var(--color-brass)] uppercase">
+            <span className="mt-[3px] text-[0.625rem] tracking-[0.3em] text-[var(--metal)] uppercase">
               Since 1910
             </span>
           </span>
@@ -163,7 +190,7 @@ export function Masthead() {
                 narrow screens and at the very top of the page. */}
             <li className="ml-[var(--s-2)] flex items-center" aria-hidden="true">
               <span className="mr-[var(--s-4)] h-4 w-px bg-[var(--hairline)]" />
-              <Moon phase={progress} size={17} className="text-[var(--color-brass)]" />
+              <Moon phase={progress} size={17} className="text-[var(--metal)]" />
             </li>
           </ul>
         </nav>
@@ -206,13 +233,17 @@ export function Masthead() {
 }
 
 /**
- * The colophon. Set at the very bottom of the sunrise, in full
- * daylight, and deliberately plain — after a descent this long the
- * last thing the page should do is stop talking.
+ * The colophon. Set at the very bottom of the sky and deliberately
+ * plain — after a descent this long the last thing the page should do
+ * is stop talking.
+ *
+ * Toned for night, not day. The cycle closes where it opened, so this
+ * sits on #10162a; declaring tone-day here put dark ink on dark navy
+ * and dropped the colophon to 3.6:1.
  */
 export function Colophon() {
   return (
-    <footer className="tone-day relative">
+    <footer className="tone-night relative">
       <div className="mx-auto w-full max-w-[var(--frame)] px-[var(--gutter)] pb-[var(--s-5)] pl-[calc(var(--gutter)+var(--rule-channel))]">
         <div className="rule mb-[var(--s-4)] h-px w-full" />
         <div className="flex flex-col gap-[var(--s-3)] sm:flex-row sm:items-baseline sm:justify-between">

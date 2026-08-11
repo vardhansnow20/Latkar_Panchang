@@ -1,4 +1,5 @@
 import type { ArchiveTheme, ArchivePhoto, ImageAsset } from "@/types/content"
+import { asset } from "@/lib/asset"
 
 /**
  * Source: 11 photographs and documents supplied directly by the
@@ -30,8 +31,8 @@ const img = (
   alt: string,
   aspectRatio: number
 ): { image: ImageAsset; fullImage: ImageAsset } => ({
-  image: { src: `/legacy-archive/${slug}.webp`, alt, aspectRatio },
-  fullImage: { src: `/legacy-archive/${slug}-full.webp`, alt, aspectRatio },
+  image: { src: asset(`legacy-archive/${slug}.webp`), alt, aspectRatio },
+  fullImage: { src: asset(`legacy-archive/${slug}-full.webp`), alt, aspectRatio },
 })
 
 /** The section's opening image — the milestone the rest of the

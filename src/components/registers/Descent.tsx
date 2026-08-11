@@ -7,12 +7,22 @@ import { history, historyTimeline } from "@/data/history"
 import { rise, viewport } from "@/lib/motion"
 import { cn } from "@/lib/utils"
 import { useReducedMotion } from "@/hooks/useReducedMotion"
+import { onScrollFrame } from "@/lib/onScroll"
 
 const COUNT = historyTimeline.length
 /** Screens of scroll given to the orbit. One per milestone plus a
  * half at each end, so the first arrives and the last departs rather
  * than snapping in at the section edges. */
-const SCENE_SCREENS = COUNT + 1
+// Half a screen per milestone.
+//
+// This is scroll spent on a fixed scene rather than on content, which
+// is the most expensive kind of page height there is: the visitor
+// keeps scrolling and the page appears not to move. Measured against
+// the reference the client supplied — fourteen sections inside 6.2
+// screens — a timeline of this length spending four-and-a-third
+// screens on a handful of dates was the single worst ratio on the
+// page. Half a screen still gives each milestone a clear arrival.
+const SCENE_SCREENS = COUNT * 0.5 + 0.5
 
 /**
  * A hundred years, taken as an orbit rather than a list.
@@ -71,13 +81,7 @@ export function Descent() {
       setActive((prev) => (prev === i ? prev : i))
     }
 
-    read()
-    window.addEventListener("scroll", read, { passive: true })
-    window.addEventListener("resize", read)
-    return () => {
-      window.removeEventListener("scroll", read)
-      window.removeEventListener("resize", read)
-    }
+    return onScrollFrame(read)
   }, [prefersReducedMotion, rotation, step])
 
   return (
@@ -92,7 +96,7 @@ export function Descent() {
     <Register id="descent" tone="night" height="open">
       <StarField count={34} className="absolute inset-0" />
 
-      <Measure size="wide" className="relative mb-[var(--s-7)]">
+      <Measure size="wide" className="relative mb-[var(--s-6)]">
         <m.div initial="hidden" whileInView="visible" viewport={viewport} variants={rise}>
           <p className="tick mb-[var(--s-3)]">{history.eyebrow}</p>
           <h2 className="mb-[var(--s-3)] text-chapter text-[var(--ink)]">{history.heading}</h2>
@@ -108,7 +112,7 @@ export function Descent() {
               it cannot interfere with its own stickiness — only
               ancestors between a sticky element and the viewport can
               break it. */}
-          <div className="sticky top-0 flex h-[100svh] items-center overflow-hidden">
+          <div className="sticky top-0 flex h-[100svh] items-center overflow-hidden py-[var(--s-5)]">
             <Dial rotation={rotation} active={active} />
           </div>
         </div>
@@ -222,8 +226,20 @@ function Dial({
                 {String(i + 1).padStart(2, "0")} / {String(COUNT).padStart(2, "0")}
               </p>
               <p
-                className="mb-[var(--s-3)] text-epoch leading-[0.86] text-[var(--ink)] tabular-nums"
-                style={{ fontFamily: "var(--font-display)" }}
+                className="mb-[var(--s-3)] text-[var(--ink)] tabular-nums"
+                // Capped against viewport *height*, not just width.
+                // `--text-epoch` reaches 13rem on a wide screen, and
+                // the year plus its title, body and plate then exceed
+                // the sticky scene's 100svh — which clips the numeral's
+                // ascenders against the top of the frame. Leading and
+                // tracking are restated because an inline font-size
+                // bypasses the `text-epoch` utility that carries them.
+                style={{
+                  fontFamily: "var(--font-display)",
+                  fontSize: "min(var(--text-epoch), 19svh)",
+                  lineHeight: "0.86",
+                  letterSpacing: "var(--text-epoch--letter-spacing)",
+                }}
               >
                 {entry.year}
               </p>

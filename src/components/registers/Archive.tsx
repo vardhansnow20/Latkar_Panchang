@@ -1,11 +1,12 @@
 import { useState } from "react"
 import { m } from "framer-motion"
 import { Register, Measure } from "@/components/sky/Register"
+import { Gallery } from "@/components/sky/Gallery"
 import { Plate, PlateLabel } from "@/components/sky/Plate"
 import { Figure } from "@/components/sky/Celestial"
 import { Lightbox, type LightboxItem } from "@/components/sky/Lightbox"
 import { legacyArchive, heroPhoto, archiveThemes } from "@/data/legacyArchive"
-import { rise, unveil, unveilSide, sequence, viewport } from "@/lib/motion"
+import { rise, unveil, sequence, viewport } from "@/lib/motion"
 import { cn } from "@/lib/utils"
 import type { ArchivePhoto } from "@/types/content"
 
@@ -91,6 +92,7 @@ function Mounted({
   glazed = false,
   corners = false,
   pinned = false,
+  maxHeight,
 }: {
   photo: ArchivePhoto
   onOpen: (photo: ArchivePhoto) => void
@@ -98,6 +100,7 @@ function Mounted({
   glazed?: boolean
   corners?: boolean
   pinned?: boolean
+  maxHeight?: string
 }) {
   return (
     <div
@@ -111,7 +114,7 @@ function Mounted({
     >
       {pinned && <Pin />}
       <div className="relative">
-        <PlateButton photo={photo} onOpen={onOpen} mount={mount} glazed={glazed} />
+        <PlateButton photo={photo} onOpen={onOpen} mount={mount} glazed={glazed} maxHeight={maxHeight} />
         {corners && <Corners />}
       </div>
     </div>
@@ -163,9 +166,9 @@ export function Archive() {
         whileInView="visible"
         viewport={viewport}
         variants={rise}
-        className="relative mb-[var(--s-7)]"
+        className="relative mb-[var(--s-6)]"
       >
-        <p className="text-epoch text-[var(--color-brass)] tabular-nums" style={display}>
+        <p className="text-epoch text-[var(--metal)] tabular-nums" style={display}>
           {legacyArchive.eyebrow}
         </p>
         <div className="rule my-[var(--s-4)] h-px w-full" />
@@ -183,7 +186,9 @@ export function Archive() {
         whileInView="visible"
         viewport={viewport}
         variants={unveil}
-        className="mb-[var(--s-8)]"
+        // Capped: at full width this ran nearly a screen tall and
+        // swallowed the room it is supposed to open.
+        className="mb-[var(--s-6)] max-w-[50rem]"
       >
         <Mounted photo={heroPhoto} onOpen={open} mount="deep" pinned />
         <p className="tick mt-[var(--s-3)] tabular-nums">{plateNumber(heroPhoto)}</p>
@@ -211,14 +216,24 @@ export function Archive() {
 
 /** Wall text. Numbered, because a visitor walking rooms wants to
  * know how many there are. */
-function RoomText({ theme, index }: { theme: (typeof archiveThemes)[number]; index: number }) {
+function RoomText({
+  theme,
+  index,
+  beside = false,
+}: {
+  theme: (typeof archiveThemes)[number]
+  index: number
+  /** Set beside the piece rather than above it. Drops the stacked
+   * margin and lets the wall text run at its own narrower measure. */
+  beside?: boolean
+}) {
   return (
     <m.div
       initial="hidden"
       whileInView="visible"
       viewport={viewport}
       variants={rise}
-      className="mb-[var(--s-5)]"
+      className={cn(beside ? "mb-[var(--s-4)] lg:mb-0" : "mb-[var(--s-5)]")}
     >
       <div className="mb-[var(--s-3)] flex items-baseline gap-[var(--s-3)]">
         <span className="tick tabular-nums">
@@ -235,9 +250,17 @@ function RoomText({ theme, index }: { theme: (typeof archiveThemes)[number]; ind
 }
 
 /**
- * One room. The layout is chosen by how many pieces it holds and
- * what kind they are, not by position in a rotation — a certificate
- * and a crowd photograph want genuinely different walls.
+ * One room: its wall text, and the run of pieces hung beside it.
+ *
+ * This replaced three separate layout branches — one each for rooms
+ * holding one, two and three pieces — which between them spent 8.3
+ * screens on eleven objects. A visitor walks a wall sideways at a
+ * fixed height, so the pieces now run horizontally and the room costs
+ * roughly the height of a single plate however many it holds.
+ *
+ * The constraints the client set on this section are kept: the frame
+ * tilts and their angles, the brass pins, gold photo-corners on the
+ * documents only, and the slight overlap in the run of three.
  */
 function Room({
   theme,
@@ -253,96 +276,49 @@ function Room({
   const glazed = theme.id === "recognition-certificates"
 
   return (
-    <section className="mb-[var(--s-8)]">
-      <RoomText theme={theme} index={index} />
+    <section className="mb-[var(--s-6)] lg:flex lg:items-start lg:gap-[var(--s-6)]">
+      {/* Wall text, in its own narrow column. Rooms alternate which
+          side it hangs on so six of them do not march down the page
+          in one rhythm. */}
+      <div
+        className={cn(
+          "lg:w-[17rem] lg:shrink-0",
+          index % 2 === 0 ? "lg:order-1" : "lg:order-2"
+        )}
+      >
+        <RoomText theme={theme} index={index} beside />
+      </div>
 
-      {photos.length === 1 && (
-        <m.figure
-          initial="hidden"
-          whileInView="visible"
-          viewport={viewport}
-          variants={unveilSide}
-          className={cn(
-            "w-full",
-            // Single pieces alternate which margin they hang from, and
-            // at different widths, so consecutive rooms never present
-            // the same rectangle in the same place.
-            index % 2 === 0 ? "lg:w-[62%]" : "lg:ml-auto lg:w-[54%]"
-          )}
-        >
-          <Mounted photo={photos[0]} onOpen={onOpen} mount="deep" pinned />
-          <p className="tick mt-[var(--s-3)] tabular-nums">{plateNumber(photos[0])}</p>
-          <PlateLabel
-            title={photos[0].title}
-            year={photos[0].year}
-            description={photos[0].description}
-            className="mt-[var(--s-2)]"
-          />
-        </m.figure>
-      )}
-
-      {photos.length === 2 && (
-        <m.div
-          initial="hidden"
-          whileInView="visible"
-          viewport={viewport}
-          variants={sequence}
-          className="grid gap-[var(--s-5)] sm:grid-cols-2 sm:gap-[var(--s-6)]"
-        >
+      <m.div
+        initial="hidden"
+        whileInView="visible"
+        viewport={viewport}
+        variants={sequence}
+        className={cn("min-w-0 lg:flex-1", index % 2 === 0 ? "lg:order-2" : "lg:order-1")}
+      >
+        <Gallery label={theme.title} overlap={photos.length > 2}>
           {photos.map((photo, i) => (
-            <m.figure key={photo.id} variants={rise} className={i === 1 ? "sm:mt-[var(--s-7)]" : ""}>
-              {/* Documents get gold photo-corners; a certificate is
-                  the one kind of piece that is really mounted that
-                  way, so giving them to everything would flatten the
-                  distinction rather than raise it. */}
+            <m.figure key={photo.id} variants={rise}>
               <Mounted
                 photo={photo}
                 onOpen={onOpen}
-                mount="deep"
+                mount={photos.length === 1 ? "deep" : "thin"}
                 glazed={glazed}
                 corners={glazed}
+                pinned={photos.length === 1 || i === 1}
+                maxHeight="15rem"
               />
               <p className="tick mt-[var(--s-3)] tabular-nums">{plateNumber(photo)}</p>
               <PlateLabel
                 title={photo.title}
                 year={photo.year}
-                description={photo.description}
+                description={photos.length === 1 ? photo.description : undefined}
                 className="mt-[var(--s-2)]"
               />
             </m.figure>
           ))}
-        </m.div>
-      )}
-
-      {photos.length > 2 && (
-        <m.div
-          initial="hidden"
-          whileInView="visible"
-          viewport={viewport}
-          variants={sequence}
-          className="grid gap-[var(--s-5)] sm:grid-cols-3"
-        >
-          {photos.map((photo, i) => (
-            <m.figure
-              key={photo.id}
-              variants={rise}
-              className={cn(
-                i === 1 && "sm:mt-[var(--s-6)]",
-                i === 2 && "sm:mt-[var(--s-3)]",
-                // The run of three overlaps slightly into its
-                // neighbour, so the wall reads as pieces laid over one
-                // another rather than three columns of equal width.
-                i === 1 && "sm:-ml-[var(--s-4)] sm:z-10",
-                i === 2 && "sm:-ml-[var(--s-3)]"
-              )}
-            >
-              <Mounted photo={photo} onOpen={onOpen} mount="thin" pinned={i === 1} />
-              <p className="tick mt-[var(--s-3)] tabular-nums">{plateNumber(photo)}</p>
-              <PlateLabel title={photo.title} year={photo.year} className="mt-[var(--s-2)]" />
-            </m.figure>
-          ))}
-        </m.div>
-      )}
+        </Gallery>
+      </m.div>
     </section>
   )
 }
@@ -352,11 +328,13 @@ function PlateButton({
   onOpen,
   mount,
   glazed,
+  maxHeight,
 }: {
   photo: ArchivePhoto
   onOpen: (photo: ArchivePhoto) => void
   mount: "thin" | "deep"
   glazed?: boolean
+  maxHeight?: string
 }) {
   return (
     <button
@@ -365,7 +343,7 @@ function PlateButton({
       aria-label={`View full image: ${photo.title}`}
       className="block w-full cursor-zoom-in text-left"
     >
-      <Plate image={photo.image} mount={mount} glazed={glazed} interactive />
+      <Plate image={photo.image} mount={mount} glazed={glazed} maxHeight={maxHeight} interactive />
     </button>
   )
 }
