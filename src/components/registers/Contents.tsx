@@ -1,4 +1,5 @@
 import { m } from "framer-motion"
+import { Marginalia } from "@/components/sky/Marginalia"
 import { Register, Measure } from "@/components/sky/Register"
 import { Gallery } from "@/components/sky/Gallery"
 import { Plate } from "@/components/sky/Plate"
@@ -41,6 +42,8 @@ const pageWalk = [
 export function Contents() {
   return (
     <Register id="contents" tone="dawn" height="vast" className="overflow-hidden">
+      <Marginalia side="left" />
+      <Marginalia side="right" />
       <Figure
         name="chart" opacity={0.25}
         className="pointer-events-none absolute hidden sm:block -top-[6%] right-[-14%] h-[26rem] w-[39rem] text-[var(--ink-faint)] lg:h-[34rem] lg:w-[51rem]"

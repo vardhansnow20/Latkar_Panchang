@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react"
 import { m, useMotionValue, type MotionValue } from "framer-motion"
+import { Marginalia } from "@/components/sky/Marginalia"
 import { Register, Measure } from "@/components/sky/Register"
 import { Figure, StarField } from "@/components/sky/Celestial"
 import { elements, panchangElements, type PanchangElement } from "@/data/elements"
@@ -85,6 +86,8 @@ export function Elements() {
        container, and `position: sticky` would then anchor to it rather
        than to the viewport, so the scene would never stick. */
     <Register id="elements" tone="night" height="open">
+      <Marginalia side="left" />
+      <Marginalia side="right" />
       <StarField count={34} className="absolute inset-0" />
 
       <Figure
