@@ -158,7 +158,28 @@ export function Archive() {
         <p className="tick mb-[var(--s-3)]">
           <ChapterMark n={4} />
         </p>
-        <p className="text-epoch text-[var(--metal)] tabular-nums" style={display}>
+        {/* Set as an outline rather than a solid.
+         *
+         * At epoch scale a filled numeral in the tone's darkest metal
+         * put roughly 200px of near-black across the widest part of
+         * the page, and it read as shouting — it outweighed the
+         * chapter heading beneath it, which is the thing that should
+         * lead. Drawn as a rule-weight outline it keeps the full
+         * scale, and the scale is the point: a century is meant to
+         * feel long. It simply stops competing for the eye. */}
+        <p
+          className="text-epoch tabular-nums"
+          style={{
+            ...display,
+            // A faint fill rather than `transparent`, deliberately.
+            // If text-stroke or color-mix is unsupported the numerals
+            // degrade to "quiet but present" instead of vanishing —
+            // transparent text whose outline fails to paint is
+            // invisible text, which is a failure with no floor.
+            color: "color-mix(in srgb, var(--metal) 15%, transparent)",
+            WebkitTextStroke: "1px color-mix(in srgb, var(--metal) 58%, transparent)",
+          }}
+        >
           {legacyArchive.eyebrow}
         </p>
         <div className="rule my-[var(--s-4)] h-px w-full" />

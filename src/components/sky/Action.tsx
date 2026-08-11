@@ -54,7 +54,12 @@ export function Action({
             "polished object" — it gives the surface a curve. */}
         <span
           aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 top-0 h-1/2 rounded-t-full"
+          // No radius of its own. The pill already clips with
+          // `overflow-hidden rounded-full`, and `rounded-t-full` on a
+          // half-height box resolves to a huge elliptical edge that
+          // cuts visibly across the metal near both ends — which is
+          // the "broken texture" at the button's tail.
+          className="pointer-events-none absolute inset-x-0 top-0 h-1/2"
           style={{
             background:
               "linear-gradient(180deg, rgba(255,253,246,0.55) 0%, rgba(255,250,235,0.18) 55%, transparent 100%)",
@@ -64,10 +69,18 @@ export function Action({
             bounces back up into a curved surface. */}
         <span
           aria-hidden="true"
-          className="pointer-events-none absolute inset-x-[12%] bottom-0 h-[30%] rounded-b-full"
+          // Full width with a horizontal falloff, rather than inset to
+          // 12% with a radius. The inset produced two hard vertical
+          // terminations near the ends; a mask fades the pool out
+          // instead, which is what a reflection actually does.
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-[34%]"
           style={{
             background:
               "linear-gradient(0deg, rgba(255,246,222,0.28) 0%, transparent 100%)",
+            maskImage:
+              "linear-gradient(90deg, transparent 0%, #000 22%, #000 78%, transparent 100%)",
+            WebkitMaskImage:
+              "linear-gradient(90deg, transparent 0%, #000 22%, #000 78%, transparent 100%)",
           }}
         />
 

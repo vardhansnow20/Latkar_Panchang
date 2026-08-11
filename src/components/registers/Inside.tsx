@@ -1,7 +1,6 @@
 import { useRef, useState } from "react"
 import { m, useScroll, useTransform } from "framer-motion"
 import { Maximize2 } from "lucide-react"
-import { Marginalia } from "@/components/sky/Marginalia"
 import { Register, Measure, ChapterMark } from "@/components/sky/Register"
 import { Plate } from "@/components/sky/Plate"
 import { Figure } from "@/components/sky/Celestial"
@@ -47,8 +46,6 @@ export function Inside() {
     /* Clipping is safe here — unlike Descent, this register has no
        sticky child for an overflow container to break. */
     <Register id="inside" tone="dawn" height="vast" className="overflow-hidden">
-      <Marginalia side="left" />
-      <Marginalia side="right" />
       <Figure
         name="chart"
         opacity={0.2}
