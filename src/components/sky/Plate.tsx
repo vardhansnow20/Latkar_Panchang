@@ -29,12 +29,42 @@ interface PlateProps {
   interactive?: boolean
   /** Board thickness. `none` gives a bare, unmounted image. */
   mount?: "none" | "thin" | "deep"
+  /** The brass pin at the top edge. On by default — a mounted piece
+   * hangs from something. Unmounted plates never take one, since
+   * there is no board for a pin to go through. */
+  pinned?: boolean
   /** Hang the piece at a common height, letting the mount board make
    * up the difference — which is how a wall of differently-proportioned
    * pieces is actually framed. The image is contained rather than
    * cropped, because an archival scan must never lose its edges. */
   maxHeight?: string
   className?: string
+}
+
+/**
+ * The brass pin a mounted piece hangs from.
+ *
+ * This lived in the Archive and was passed per-plate, so it appeared
+ * on four pieces out of thirty-odd and read as an inconsistency
+ * rather than a detail. It belongs here instead: Plate is the only
+ * image component on the site, so putting the pin at this level is
+ * what makes it true of every mounted piece by construction.
+ *
+ * It was also `hidden sm:block`, which is why it never appeared on a
+ * phone at all. A pin is 11px — it is not what makes a small screen
+ * busy, and its absence is more noticeable than its presence.
+ */
+function Pin() {
+  return (
+    <span
+      aria-hidden="true"
+      className="pointer-events-none absolute -top-2 left-1/2 z-10 size-[11px] -translate-x-1/2 rounded-full"
+      style={{
+        background: "radial-gradient(circle at 34% 30%, #f0e0bd 0%, #c2a273 48%, #8a6b3c 100%)",
+        boxShadow: "0 2px 5px rgba(20,24,40,0.45), 0 0 0 1px rgba(120,92,48,0.35)",
+      }}
+    />
+  )
 }
 
 const MOUNT = {
@@ -137,6 +167,7 @@ export function Plate({
   glazed = false,
   interactive = false,
   mount = "thin",
+  pinned = true,
   maxHeight,
   className,
 }: PlateProps) {
@@ -173,6 +204,7 @@ export function Plate({
         className
       )}
     >
+      {pinned && mount !== "none" && <Pin />}
       <div
         className={cn(
           "relative overflow-hidden bg-[var(--color-paper-sunk)]",

@@ -50,7 +50,9 @@ import { onScrollFrame } from "@/lib/onScroll"
 const COUNT = panchangElements.length
 /** Half a screen per limb, plus a little at each end so the first
  * arrives and the last departs rather than snapping at the edges. */
-const SCENE_SCREENS = COUNT * 0.5 + 0.4
+// Reported as dragging at half a screen per limb. A third still
+// gives each a clear arrival and returns most of a screen.
+const SCENE_SCREENS = COUNT * 0.35 + 0.35
 
 /** Devanagari numerals, since the numbering belongs to the same
  * writing system as the names it counts. */

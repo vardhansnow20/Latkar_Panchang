@@ -62,19 +62,6 @@ function Corners() {
 }
 
 /** A brass pin holding the piece to the wall. */
-function Pin() {
-  return (
-    <span
-      aria-hidden="true"
-      className="pointer-events-none absolute hidden sm:block -top-2 left-1/2 z-10 size-[11px] -translate-x-1/2 rounded-full"
-      style={{
-        background: "radial-gradient(circle at 34% 30%, #f0e0bd 0%, #c2a273 48%, #8a6b3c 100%)",
-        boxShadow: "0 2px 5px rgba(20,24,40,0.45), 0 0 0 1px rgba(120,92,48,0.35)",
-      }}
-    />
-  )
-}
-
 /**
  * A piece hung on the wall.
  *
@@ -91,7 +78,6 @@ function Mounted({
   mount,
   glazed = false,
   corners = false,
-  pinned = false,
   maxHeight,
 }: {
   photo: ArchivePhoto
@@ -99,7 +85,6 @@ function Mounted({
   mount: "thin" | "deep"
   glazed?: boolean
   corners?: boolean
-  pinned?: boolean
   maxHeight?: string
 }) {
   return (
@@ -112,7 +97,6 @@ function Mounted({
       className="group/mount relative rotate-[var(--tilt)] transition-transform duration-[var(--t-reveal)] ease-[var(--ease)] hover:-translate-y-1.5 hover:rotate-0"
       style={{ "--tilt": `${tiltFor(photo)}deg` } as React.CSSProperties}
     >
-      {pinned && <Pin />}
       <div className="relative">
         <PlateButton photo={photo} onOpen={onOpen} mount={mount} glazed={glazed} maxHeight={maxHeight} />
         {corners && <Corners />}
@@ -196,7 +180,7 @@ export function Archive() {
         // swallowed the room it is supposed to open.
         className="mb-[var(--s-6)] max-w-[50rem]"
       >
-        <Mounted photo={heroPhoto} onOpen={open} mount="deep" pinned />
+        <Mounted photo={heroPhoto} onOpen={open} mount="deep" />
         <p className="tick mt-[var(--s-3)] tabular-nums">{plateNumber(heroPhoto)}</p>
         <PlateLabel
           title={heroPhoto.title}
@@ -303,7 +287,7 @@ function Room({
         className={cn("min-w-0 lg:flex-1", index % 2 === 0 ? "lg:order-2" : "lg:order-1")}
       >
         <Gallery label={theme.title} overlap={photos.length > 2}>
-          {photos.map((photo, i) => (
+          {photos.map((photo) => (
             <m.figure key={photo.id} variants={rise}>
               <Mounted
                 photo={photo}
@@ -311,7 +295,6 @@ function Room({
                 mount={photos.length === 1 ? "deep" : "thin"}
                 glazed={glazed}
                 corners={glazed}
-                pinned={photos.length === 1 || i === 1}
                 maxHeight="15rem"
               />
               <p className="tick mt-[var(--s-3)] tabular-nums">{plateNumber(photo)}</p>

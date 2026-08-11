@@ -103,11 +103,13 @@ export function Gallery({
           // would otherwise be pinned to half the screen width with
           // an empty cell beside it. Several Archive rooms hold one
           // object, and on a phone that is the whole wall.
-          "grid gap-[var(--s-4)]",
+          "grid gap-[var(--s-4)] pt-[var(--s-2)]",
           single ? "grid-cols-1" : "grid-cols-2",
           // From `sm` the same children become the wall.
           "sm:flex sm:gap-[var(--s-5)] sm:overflow-x-auto sm:overflow-y-hidden",
-          "sm:snap-x sm:snap-mandatory sm:pb-[var(--s-3)]",
+          // Vertical padding on both edges: a rail clips its own
+          // overflow, and every plate's pin stands proud of its top.
+          "sm:snap-x sm:snap-mandatory sm:pt-[var(--s-3)] sm:pb-[var(--s-3)]",
           // The scrollbar is replaced by the brass rule below.
           "sm:[-ms-overflow-style:none] sm:[scrollbar-width:none] sm:[&::-webkit-scrollbar]:hidden",
           single && "sm:justify-start"
