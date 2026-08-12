@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Bug-report media: kept out of public/ so it is never deployed.
+bug-uploads/

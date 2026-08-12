@@ -184,32 +184,60 @@ export function Figure({
  * rearrange itself on every render.
  */
 export function StarField({ count = 40, className }: { count?: number; className?: string }) {
-  const stars = useMemo(() => {
+  const field = useMemo(() => {
     // A real field is mostly faint, small and white, with a scattering
     // of brighter and warmer bodies. Weighting the population this way
     // — rather than randomising every star equally — is what stops it
     // reading as evenly-spaced dots.
     const pick = () => {
       const r = Math.random()
-      if (r < 0.62) return { klass: "dust", tint: "rgba(246,241,228,0.9)", size: 0.8 + Math.random() * 0.7, glow: 0 }
-      if (r < 0.84) return { klass: "mid", tint: "rgba(255,252,244,1)", size: 1.5 + Math.random() * 1.1, glow: 2 }
-      if (r < 0.94) return { klass: "gold", tint: "rgba(226,190,124,1)", size: 1.8 + Math.random() * 1.4, glow: 5 }
-      return { klass: "blue", tint: "rgba(176,199,240,1)", size: 1.6 + Math.random() * 1.3, glow: 4 }
+      if (r < 0.62) return { tint: "rgba(246,241,228,0.9)", size: 0.8 + Math.random() * 0.7, glow: 0 }
+      if (r < 0.84) return { tint: "rgba(255,252,244,1)", size: 1.5 + Math.random() * 1.1, glow: 2 }
+      if (r < 0.94) return { tint: "rgba(226,190,124,1)", size: 1.8 + Math.random() * 1.4, glow: 5 }
+      return { tint: "rgba(176,199,240,1)", size: 1.6 + Math.random() * 1.3, glow: 4 }
     }
-    return Array.from({ length: count }, (_, i) => {
+    const all = Array.from({ length: count }, (_, i) => {
       const s = pick()
       return {
         id: i,
         top: Math.random() * 100,
         left: Math.random() * 100,
         ...s,
-        // Bigger stars twinkle more slowly, as brighter bodies do.
         dur: 5 + s.size * 2 + Math.random() * 7,
         delay: Math.random() * 12,
         min: 0.06 + Math.random() * 0.16,
         max: 0.42 + Math.random() * 0.5,
       }
     })
+
+    /**
+     * Only a handful of stars actually animate.
+     *
+     * Every star used to be its own element running an infinite
+     * animation, so a field of ninety-six meant ninety-six
+     * independently animating nodes layered under a hero that is
+     * itself transforming on scroll. The eye cannot track more than a
+     * few twinkles at once; the rest is texture, and texture does not
+     * need to be live.
+     *
+     * So the majority are baked into a single element as one stack of
+     * radial gradients — painted once, never repainted, one layer —
+     * and only a dozen remain as real nodes that breathe.
+     */
+    const live = all.slice(0, Math.min(12, count))
+    const baked = all.slice(live.length)
+
+    const paint = baked
+      .map((s) => {
+        const r = s.size / 2
+        // The glow is baked into the gradient's falloff rather than
+        // carried as a box-shadow, which cannot be painted once.
+        const halo = s.glow ? r + s.glow : r + 0.5
+        return `radial-gradient(circle at ${s.left.toFixed(2)}% ${s.top.toFixed(2)}%, ${s.tint} 0, ${s.tint} ${r.toFixed(2)}px, ${s.tint.replace(/[\d.]+\)$/, "0.18)")} ${(r + 0.6).toFixed(2)}px, transparent ${halo.toFixed(2)}px)`
+      })
+      .join(", ")
+
+    return { live, paint }
   }, [count])
 
   return (
@@ -219,19 +247,16 @@ export function StarField({ count = 40, className }: { count?: number; className
     // is not itself clipping. Containing it here fixes that everywhere
     // at once, and is safe — this box never wraps a sticky element.
     <div className={cn("pointer-events-none overflow-hidden", className)} aria-hidden="true">
-      {stars.map((s, i) => (
+      {/* The static field: one element, one paint, no animation. */}
+      {field.paint && (
+        <div className="absolute inset-0" style={{ backgroundImage: field.paint }} />
+      )}
+
+      {/* The few that live. */}
+      {field.live.map((s) => (
         <span
           key={s.id}
-          className={cn(
-            "star absolute rounded-full",
-            // Past the fortieth star the field is texture, not
-            // composition. Each one carries an infinite opacity
-            // animation and most carry a box-shadow glow, and on a
-            // phone that texture is paid for on every scrolled frame
-            // while being too fine to read. `display: none` costs
-            // nothing to paint, unlike a lowered opacity.
-            i >= 40 && "hidden sm:block"
-          )}
+          className="star absolute rounded-full"
           style={
             {
               top: `${s.top}%`,
@@ -252,15 +277,6 @@ export function StarField({ count = 40, className }: { count?: number; className
   )
 }
 
-/**
- * A single meteor, crossing rarely.
- *
- * The whole effect depends on how seldom it happens: the streak
- * occupies about 1.5% of a ~40s cycle, so most of the time there is
- * nothing there at all, and a visitor who sees one has the small
- * pleasure of having caught it. Two are staggered so they never fall
- * together.
- */
 export function ShootingStars({ className }: { className?: string }) {
   const streaks = [
     { top: "14%", left: "8%", dur: 34, delay: 6, len: 190, angle: 24 },

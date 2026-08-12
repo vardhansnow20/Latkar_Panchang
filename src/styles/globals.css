@@ -346,6 +346,18 @@
     animation: turn var(--turn-dur, 240s) linear infinite;
   }
 
+  /* Rotation is the single most expensive thing a large SVG can do:
+     the browser re-rasterises the turned group every frame. Below
+     `sm` the figures carrying it are also the largest things on
+     screen, so they hold still. A drawn instrument still reads as an
+     instrument when it is not moving, and the hero's parallax already
+     supplies the motion. */
+  @media (width < 30rem) {
+    .turning {
+      animation: none;
+    }
+  }
+
   /* A constellation line that draws itself once on load. Requires
      pathLength="1" on the path so the dash maths is geometry-
      independent. */
@@ -473,15 +485,21 @@
   }
 }
 
+/* Opacity only.
+ *
+ * This animated `transform: scale()` as well, and a scaling element
+ * that carries a `box-shadow` has to re-rasterise that shadow on every
+ * frame. With ninety-six stars in the opening, a third of them glowing,
+ * inside planes already transforming on scroll, that was the hero's
+ * jank. A 1px dot growing to 1.35px was never visible anyway — the
+ * twinkle a viewer actually perceives is entirely the opacity. */
 @keyframes twinkle {
   0%,
   100% {
     opacity: var(--star-min, 0.15);
-    transform: scale(1);
   }
   50% {
     opacity: var(--star-max, 0.8);
-    transform: scale(1.35);
   }
 }
 
