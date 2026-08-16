@@ -90,12 +90,9 @@ export function Calendar() {
 
         <m.div initial="hidden" whileInView="visible" viewport={viewport} variants={rise}>
           <p className="tick mb-[var(--s-3)] tabular-nums">{laxmiCalendar.plate.designation}</p>
-          <p
-            className="mb-[var(--s-4)] max-w-[30ch] text-title text-[var(--ink)]"
-            style={{ fontFamily: "var(--font-display)" }}
-          >
-            {laxmiCalendar.body}
-          </p>
+          <Measure className="mb-[var(--s-4)]">
+            <p className="text-body text-[var(--ink-soft)]">{laxmiCalendar.body}</p>
+          </Measure>
           <Measure className="mb-[var(--s-5)]">
             <p className="text-note text-[var(--ink-soft)]">{laxmiCalendar.plate.note}</p>
           </Measure>
