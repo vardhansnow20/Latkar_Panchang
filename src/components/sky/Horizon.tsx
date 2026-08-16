@@ -54,10 +54,15 @@ const SUN = 42
 
 /** Three ray systems. Layered light reads as depth; one ring of even
  * spokes reads as a diagram. */
+/* Ray lengths are bounded so the longest reaches ~200 units from the
+ * centre at y=210 — i.e. it stops just inside the top of the 320-unit
+ * viewBox. Now that the figure is clipped to its frame, a ray that
+ * overshot would be sliced flat along the edge, which looks like a
+ * rendering fault rather than light. */
 const CORONA = [
   { count: 48, from: SUN + 10, lengths: [104, 58, 74], width: 0.5, opacity: 0.34, period: 420 },
-  { count: 24, from: SUN + 22, lengths: [150, 92], width: 0.9, opacity: 0.5, period: 300 },
-  { count: 12, from: SUN + 44, lengths: [214, 168], width: 1.2, opacity: 0.34, period: 620 },
+  { count: 24, from: SUN + 22, lengths: [128, 86], width: 0.9, opacity: 0.5, period: 300 },
+  { count: 12, from: SUN + 44, lengths: [114, 88], width: 1.2, opacity: 0.34, period: 620 },
 ]
 
 /** Fixed stars above the light, thinning as they approach it. */
@@ -83,7 +88,16 @@ export function Horizon({
       fill="none"
       aria-hidden="true"
       focusable="false"
-      className={cn("overflow-visible", className)}
+      // Deliberately NOT `overflow-visible`.
+      //
+      // The corona reaches 256 units from a centre at y=210, and the
+      // ecliptic runs from x=-40 to x=840 — both well outside the
+      // 800×320 viewBox. Left visible, they escape the band and spray
+      // across the registers above and below it. That was invisible on
+      // a phone, where the figure renders about 330×132 and the spill
+      // is a few pixels, and glaring on a laptop, where it renders at
+      // roughly 832×333 and the overshoot scales with it.
+      className={cn(className)}
       style={{ transform: rising ? undefined : "scaleY(-1)" }}
     >
       <defs>
@@ -107,6 +121,17 @@ export function Horizon({
           <stop offset="100%" stopColor="currentColor" stopOpacity="0" />
         </linearGradient>
 
+        {/* Edge fade for the two ecliptic curves. They are authored
+            wider than the frame so their arc is correct through the
+            middle; without this they would simply stop dead at the
+            clip and read as two cut wires. */}
+        <linearGradient id={id("fade")} x1="0" x2="1" y1="0" y2="0">
+          <stop offset="0%" stopColor="currentColor" stopOpacity="0" />
+          <stop offset="18%" stopColor="currentColor" stopOpacity="1" />
+          <stop offset="82%" stopColor="currentColor" stopOpacity="1" />
+          <stop offset="100%" stopColor="currentColor" stopOpacity="0" />
+        </linearGradient>
+
         <linearGradient id={id("rule")} x1="0" x2="1" y1="0" y2="0">
           <stop offset="0%" stopColor="currentColor" stopOpacity="0" />
           <stop offset="30%" stopColor="currentColor" stopOpacity="0.5" />
@@ -123,10 +148,21 @@ export function Horizon({
         </clipPath>
 
         {/* The corona fades out before the frame edge, so the rays end
-            in air instead of being cut off by the viewBox. */}
-        <radialGradient id={id("falloff")}>
+            in air instead of being cut off by the viewBox.
+            Centred on the sun in user space, not on the mask box: an
+            objectBoundingBox gradient on a 2.5:1 rect is centred at
+            y=160 and stretched horizontally, so the fade reached the
+            top edge while still nearly opaque and the fan ended on a
+            hard horizontal line. */}
+        <radialGradient
+          id={id("falloff")}
+          gradientUnits="userSpaceOnUse"
+          cx={CX}
+          cy={CY}
+          r="212"
+        >
           <stop offset="0%" stopColor="#fff" stopOpacity="1" />
-          <stop offset="62%" stopColor="#fff" stopOpacity="1" />
+          <stop offset="58%" stopColor="#fff" stopOpacity="1" />
           <stop offset="100%" stopColor="#fff" stopOpacity="0" />
         </radialGradient>
         <mask id={id("coronaMask")}>
@@ -250,14 +286,14 @@ export function Horizon({
       {/* ── The ecliptic, passing through where the sun stands ─────── */}
       <path
         d={`M -40 ${CY + 62} Q ${CX} ${CY - 138} 840 ${CY + 62}`}
-        stroke="currentColor"
+        stroke={`url(#${id("fade")})`}
         strokeWidth="0.8"
         opacity="0.26"
         fill="none"
       />
       <path
         d={`M -40 ${CY + 76} Q ${CX} ${CY - 124} 840 ${CY + 76}`}
-        stroke="var(--color-brass-soft)"
+        stroke={`url(#${id("fade")})`}
         strokeWidth="0.7"
         strokeDasharray="1.5 10"
         opacity="0.2"

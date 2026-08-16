@@ -5,6 +5,23 @@ import type { TimelineEntry } from "@/types/content"
  * "History" + "Centenary" sections. All four entries, dates, and
  * names are as given in that document.
  */
+/**
+ * TEMPORARY — a stand-in portrait beneath the History heading, added
+ * at the client's request to preview how a photograph sits there.
+ *
+ * It is a drawn placeholder, not a photograph: it holds the exact
+ * shape and tone a real archival portrait will occupy without
+ * committing someone else's image into the repository. Replace by
+ * pointing `src` at the real file; nothing else needs to change.
+ *
+ * TODO — remove or replace once the client supplies a real portrait.
+ */
+export const historyPortrait = {
+  src: "/placeholder/dummy-portrait.svg",
+  alt: "Placeholder portrait — awaiting an archival photograph from the client",
+  aspectRatio: 4 / 5,
+}
+
 export const history = {
   eyebrow: "Our History",
   heading: "More Than a Century of Tradition",

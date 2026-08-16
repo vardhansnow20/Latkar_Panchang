@@ -145,9 +145,11 @@ export function Dusk() {
         className="relative flex min-h-[52svh] items-center justify-center"
       >
         {/* The same crossing, going the other way. */}
+        {/* Same aspect-sizing as Meridian, so both crossings hold
+            identical proportion at every width. */}
         <Horizon
           phase="set"
-          className="h-[14rem] w-full max-w-[50rem] text-[var(--ink-faint)] sm:h-[17rem] lg:h-[21rem]"
+          className="aspect-[800/320] w-full max-w-[50rem] text-[var(--ink-faint)]"
         />
       </m.div>
     </Register>

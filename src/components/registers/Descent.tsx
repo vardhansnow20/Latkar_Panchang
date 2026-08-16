@@ -4,8 +4,8 @@ import { Register, Measure, ChapterMark } from "@/components/sky/Register"
 import { Horizon } from "@/components/sky/Horizon"
 import { Plate } from "@/components/sky/Plate"
 import { Figure, StarField } from "@/components/sky/Celestial"
-import { history, historyTimeline } from "@/data/history"
-import { rise, viewport } from "@/lib/motion"
+import { history, historyTimeline, historyPortrait } from "@/data/history"
+import { rise, unveilSide, viewport } from "@/lib/motion"
 import { cn } from "@/lib/utils"
 import { useReducedMotion } from "@/hooks/useReducedMotion"
 import { onScrollFrame } from "@/lib/onScroll"
@@ -103,6 +103,22 @@ export function Descent() {
           <h2 className="mb-[var(--s-3)] text-chapter text-[var(--ink)]">{history.heading}</h2>
           <p className="text-lead text-[var(--ink-soft)]">{history.intro}</p>
         </m.div>
+
+        {/* TEMPORARY — a stand-in portrait, to preview how a
+            photograph sits under this heading. See the note on
+            `historyPortrait` in data/history.ts. */}
+        <m.figure
+          initial="hidden"
+          whileInView="visible"
+          viewport={viewport}
+          variants={unveilSide}
+          className="mt-[var(--s-5)] w-[54%] max-w-[13rem] sm:max-w-[15rem]"
+        >
+          <Plate image={historyPortrait} mount="thin" interactive />
+          <figcaption className="mt-[var(--s-2)] text-note text-[var(--ink-faint)] italic">
+            Placeholder — awaiting an archival portrait.
+          </figcaption>
+        </m.figure>
       </Measure>
 
       {prefersReducedMotion ? (
@@ -326,9 +342,16 @@ export function Meridian() {
             is the band where the page's own sky crosses from night
             into day, and it cannot carry words — so it carries the
             thing the words would have described. */}
+        {/* Sized by aspect rather than by stepped heights. The figure
+            is authored at 800×320, so giving the box that same ratio
+            means it fills its frame exactly at every width — no
+            letterboxing, and identical proportion on a phone and a
+            laptop. The stepped heights it replaced made the drawing
+            grow relative to the band as the viewport widened, which is
+            why it read as clean small and sprawling large. */}
         <Horizon
           phase="rise"
-          className="h-[16rem] w-full max-w-[52rem] text-[var(--ink-faint)] sm:h-[20rem] lg:h-[24rem]"
+          className="aspect-[800/320] w-full max-w-[52rem] text-[var(--ink-faint)]"
         />
       </m.div>
     </Register>

@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" width="800" height="1000" role="img" aria-label="Placeholder portrait">
+  <!--
+    A stand-in portrait, for previewing layout only.
+
+    Deliberately drawn rather than photographic: it occupies the exact
+    shape a real archival portrait will, in the site's own sepia range,
+    without committing someone else's photograph into the repository.
+    Replace by pointing the image asset at a real file — no component
+    change is required.
+  -->
+  <defs>
+    <linearGradient id="ground" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#e8dcc2"/>
+      <stop offset="55%" stop-color="#d8c7a5"/>
+      <stop offset="100%" stop-color="#bfa886"/>
+    </linearGradient>
+
+    <radialGradient id="key" cx="38%" cy="26%" r="72%">
+      <stop offset="0%" stop-color="#fbf3e0" stop-opacity="0.95"/>
+      <stop offset="52%" stop-color="#e3d3b4" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#8d7757" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="vignette" cx="50%" cy="46%" r="70%">
+      <stop offset="55%" stop-color="#3a2c1c" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#3a2c1c" stop-opacity="0.55"/>
+    </radialGradient>
+
+    <linearGradient id="figure" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#7d6647"/>
+      <stop offset="100%" stop-color="#4e3d29"/>
+    </linearGradient>
+
+    <filter id="soft">
+      <feGaussianBlur stdDeviation="9"/>
+    </filter>
+
+    <filter id="grain">
+      <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="4" stitchTiles="stitch"/>
+      <feColorMatrix type="saturate" values="0"/>
+    </filter>
+  </defs>
+
+  <rect width="800" height="1000" fill="url(#ground)"/>
+  <rect width="800" height="1000" fill="url(#key)"/>
+
+  <!-- Head and shoulders, softened so it reads as a figure in light
+       rather than as an icon. -->
+  <g filter="url(#soft)" opacity="0.88">
+    <path d="M400 700c-150 0-250 78-286 196h572c-36-118-136-196-286-196z" fill="url(#figure)"/>
+    <ellipse cx="400" cy="470" rx="152" ry="182" fill="url(#figure)"/>
+  </g>
+
+  <!-- A shoulder edge catching the key light. -->
+  <path
+    d="M400 700c-150 0-250 78-286 196"
+    fill="none"
+    stroke="#f3e6c9"
+    stroke-opacity="0.20"
+    stroke-width="7"
+    filter="url(#soft)"
+  />
+
+  <rect width="800" height="1000" fill="url(#vignette)"/>
+  <rect width="800" height="1000" filter="url(#grain)" opacity="0.055"/>
+</svg>
