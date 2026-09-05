@@ -10,8 +10,8 @@ import {
   ConstellationNetwork,
   MoonDisc,
 } from "@/components/sky/Celestial"
-import { hero } from "@/data/hero"
 import { rise, sequence } from "@/lib/motion"
+import { useContent } from "@/i18n/LanguageProvider"
 
 /**
  * The opening, staged as a camera move rather than a layout.
@@ -50,6 +50,7 @@ import { rise, sequence } from "@/lib/motion"
  * centring is what made it read as engineered rather than composed.
  */
 export function Opening() {
+  const c = useContent()
   const ref = useRef<HTMLElement>(null)
   const { scrollYProgress } = useScroll({
     target: ref,
@@ -172,18 +173,23 @@ export function Opening() {
 
       {/* 7 — the type. */}
       <m.div
-        className="relative flex min-h-[calc(100svh-2*var(--s-4))] flex-col items-center justify-center text-center"
+        // `pb-*` reserves the band the scroll cue occupies. The cue is
+        // absolutely positioned, so without this nothing holds space
+        // for it and the call to action slides underneath: measured at
+        // 375x812 and 1024x768 the two overlapped outright, with
+        // "Discover our legacy" printed across the button.
+        className="relative flex min-h-[calc(100svh-2*var(--s-4))] flex-col items-center justify-center pb-[clamp(3.25rem,10svh,5.5rem)] text-center [@media(max-height:560px)]:pb-0"
         initial="hidden"
         animate="visible"
         variants={sequence}
         style={{ y: typeY, opacity: typeFade, willChange: "transform, opacity" }}
       >
         <m.div variants={rise} style={{ scale: moonScale, y: moonY, willChange: "transform" }} className="mb-[clamp(0.75rem,3svh,2rem)]">
-          <MoonDisc className="w-[clamp(4.5rem,12svh,10rem)]" />
+          <MoonDisc className="w-[clamp(4.5rem,12svh,10rem)] [@media(max-height:560px)]:w-[3.25rem]" />
         </m.div>
 
         <m.p variants={rise} className="tick mb-[clamp(0.6rem,2svh,1.4rem)]">
-          {hero.eyebrow}
+          {c.hero.eyebrow}
         </m.p>
 
         <m.h1
@@ -199,24 +205,24 @@ export function Opening() {
             // line-height, and the headline then inherits body leading
             // and grows past its container. The svh term is the guard
             // that keeps a long headline inside a short viewport.
-            fontSize: "min(var(--text-hero), 14svh)",
+            fontSize: "min(var(--text-hero), var(--hero-cap))",
             lineHeight: "var(--text-hero--line-height)",
             letterSpacing: "var(--text-hero--letter-spacing)",
           }}
         >
-          {hero.heading}
+          {c.hero.heading}
         </m.h1>
 
         <m.p
           variants={rise}
           className="mb-[clamp(1.1rem,3.2svh,2.25rem)] max-w-[52ch] text-lead text-[var(--ink-soft)]"
         >
-          {hero.definition}
+          {c.hero.definition}
         </m.p>
 
         <m.div variants={rise}>
-          <Action href={hero.cta.href} weight="solid">
-            {hero.cta.label}
+          <Action href={c.hero.cta.href} weight="solid">
+            {c.hero.cta.label}
           </Action>
         </m.div>
       </m.div>
@@ -227,10 +233,14 @@ export function Opening() {
       <m.a
         href="#descent"
         style={{ opacity: cueFade }}
-        className="group/cue absolute inset-x-0 bottom-[var(--s-4)] z-10 mx-auto flex w-fit flex-col items-center gap-[var(--s-2)]"
+        // Hidden below 560px of height. On a landscape phone the hero
+        // cannot hold moon, title, lead and action *and* a cue; the cue
+        // is the only one of the five that is purely an invitation, so
+        // it is the one that goes.
+        className="group/cue absolute inset-x-0 bottom-[var(--s-4)] z-10 mx-auto flex w-fit flex-col items-center gap-[var(--s-2)] [@media(max-height:560px)]:hidden"
       >
         <span className="tick text-[var(--ink-faint)] transition-colors duration-[var(--t-quick)] group-hover/cue:text-[var(--ink)]">
-          {hero.scrollCue}
+          {c.hero.scrollCue}
         </span>
         <span
           aria-hidden="true"

@@ -1,20 +1,27 @@
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { m } from "framer-motion"
 import { Register, Measure, ChapterMark } from "@/components/sky/Register"
 import { Gallery } from "@/components/sky/Gallery"
 import { Plate, PlateLabel } from "@/components/sky/Plate"
 import { Figure } from "@/components/sky/Celestial"
 import { Lightbox, type LightboxItem } from "@/components/sky/Lightbox"
-import { legacyArchive, heroPhoto, archiveThemes } from "@/data/legacyArchive"
 import { rise, unveil, sequence, viewport } from "@/lib/motion"
 import { cn } from "@/lib/utils"
 import type { ArchivePhoto } from "@/types/content"
+import { useContent } from "@/i18n/LanguageProvider"
+import type { Content } from "@/i18n/en"
+import { fill } from "@/i18n/ui"
 
 const display = { fontFamily: "var(--font-display)" }
 
 /** Flat sequence, so Previous/Next walks the whole collection rather
  * than being trapped inside one theme. */
-const collection: ArchivePhoto[] = [heroPhoto, ...archiveThemes.flatMap((t) => t.photos)]
+/** The whole collection, in order, derived from the live tree so
+ * titles and descriptions follow the chosen language. */
+const buildCollection = (c: Content): ArchivePhoto[] => [
+  c.heroPhoto,
+  ...c.archiveThemes.flatMap((t) => t.photos),
+]
 
 /**
  * A plate's place in the collection — "PLATE 04 / 11".
@@ -25,7 +32,7 @@ const collection: ArchivePhoto[] = [heroPhoto, ...archiveThemes.flatMap((t) => t
  * obviously a presentation device and claims nothing.
  */
 /** The collection, in the shape the shared dialog expects. */
-const lightboxItems: LightboxItem[] = collection.map((p) => ({
+const buildLightboxItems = (collection: ArchivePhoto[]): LightboxItem[] => collection.map((p) => ({
   id: p.id,
   title: p.title,
   fullSrc: p.fullImage.src,
@@ -34,16 +41,23 @@ const lightboxItems: LightboxItem[] = collection.map((p) => ({
   description: p.description,
 }))
 
-const plateNumber = (photo: ArchivePhoto) => {
+const plateNumber = (
+  collection: ArchivePhoto[],
+  photo: ArchivePhoto,
+  template: string
+) => {
   const n = collection.findIndex((p) => p.id === photo.id) + 1
-  return `Plate ${String(n).padStart(2, "0")} / ${collection.length}`
+  return fill(template, {
+    n: String(n).padStart(2, "0"),
+    total: String(collection.length),
+  })
 }
 
 /** Small, fixed tilts. Derived from position so they are stable
  * between renders — a piece that re-hangs itself at a new angle on
  * every paint reads as a bug, not as a hand. */
 const TILTS = [-1.3, 0.9, -0.6, 1.2, -1.0, 0.7, -1.4, 0.5, -0.8, 1.1, -0.5]
-const tiltFor = (photo: ArchivePhoto) =>
+const tiltFor = (collection: ArchivePhoto[], photo: ArchivePhoto) =>
   TILTS[collection.findIndex((p) => p.id === photo.id) % TILTS.length]
 
 /** Gold photo-corners, as an album or a mounted document actually
@@ -87,6 +101,8 @@ function Mounted({
   corners?: boolean
   maxHeight?: string
 }) {
+  const c = useContent()
+  const collection = useMemo(() => buildCollection(c), [c])
   return (
     <div
       // Tilt travels as a custom property so both the resting angle
@@ -95,7 +111,7 @@ function Mounted({
       // `hover:rotate-0` at all — in Tailwind v4 those are separate
       // properties and would simply compose.
       className="group/mount relative rotate-[var(--tilt)] transition-transform duration-[var(--t-reveal)] ease-[var(--ease)] hover:-translate-y-1.5 hover:rotate-0"
-      style={{ "--tilt": `${tiltFor(photo)}deg` } as React.CSSProperties}
+      style={{ "--tilt": `${tiltFor(collection, photo)}deg` } as React.CSSProperties}
     >
       <div className="relative">
         <PlateButton photo={photo} onOpen={onOpen} mount={mount} glazed={glazed} maxHeight={maxHeight} />
@@ -120,6 +136,9 @@ function Mounted({
  * contact sheet.
  */
 export function Archive() {
+  const c = useContent()
+  const collection = useMemo(() => buildCollection(c), [c])
+  const lightboxItems = useMemo(() => buildLightboxItems(collection), [collection])
   const [openIndex, setOpenIndex] = useState<number | null>(null)
   const open = (photo: ArchivePhoto) =>
     setOpenIndex(collection.findIndex((p) => p.id === photo.id))
@@ -180,14 +199,14 @@ export function Archive() {
             WebkitTextStroke: "1px color-mix(in srgb, var(--metal) 58%, transparent)",
           }}
         >
-          {legacyArchive.eyebrow}
+          {c.legacyArchive.eyebrow}
         </p>
         <div className="rule my-[var(--s-4)] h-px w-full" />
         <h2 className="mb-[var(--s-3)] max-w-[16ch] text-chapter text-[var(--ink)]">
-          {legacyArchive.heading}
+          {c.legacyArchive.heading}
         </h2>
         <Measure size="wide">
-          <p className="text-lead text-[var(--ink-soft)]">{legacyArchive.intro}</p>
+          <p className="text-lead text-[var(--ink-soft)]">{c.legacyArchive.intro}</p>
         </Measure>
       </m.div>
 
@@ -201,17 +220,17 @@ export function Archive() {
         // swallowed the room it is supposed to open.
         className="mb-[var(--s-6)] max-w-[50rem]"
       >
-        <Mounted photo={heroPhoto} onOpen={open} mount="deep" />
-        <p className="tick mt-[var(--s-3)] tabular-nums">{plateNumber(heroPhoto)}</p>
+        <Mounted photo={c.heroPhoto} onOpen={open} mount="deep" />
+        <p className="tick mt-[var(--s-3)] tabular-nums">{plateNumber(collection, c.heroPhoto, c.ui.plateNumber)}</p>
         <PlateLabel
-          title={heroPhoto.title}
-          year={heroPhoto.year}
-          description={heroPhoto.description}
+          title={c.heroPhoto.title}
+          year={c.heroPhoto.year}
+          description={c.heroPhoto.description}
           className="mt-[var(--s-2)] max-w-[var(--measure-wide)]"
         />
       </m.figure>
 
-      {archiveThemes.map((theme, i) => (
+      {c.archiveThemes.map((theme, i) => (
         <Room key={theme.id} theme={theme} index={i} onOpen={open} />
       ))}
 
@@ -232,12 +251,13 @@ function RoomText({
   index,
   beside = false,
 }: {
-  theme: (typeof archiveThemes)[number]
+  theme: Content["archiveThemes"][number]
   index: number
   /** Set beside the piece rather than above it. Drops the stacked
    * margin and lets the wall text run at its own narrower measure. */
   beside?: boolean
 }) {
+  const c = useContent()
   return (
     <m.div
       initial="hidden"
@@ -248,7 +268,7 @@ function RoomText({
     >
       <div className="mb-[var(--s-3)] flex items-baseline gap-[var(--s-3)]">
         <span className="tick tabular-nums">
-          {String(index + 1).padStart(2, "0")} / {String(archiveThemes.length).padStart(2, "0")}
+          {String(index + 1).padStart(2, "0")} / {String(c.archiveThemes.length).padStart(2, "0")}
         </span>
         <span className="rule hidden h-px flex-1 self-center sm:block" />
       </div>
@@ -278,10 +298,12 @@ function Room({
   index,
   onOpen,
 }: {
-  theme: (typeof archiveThemes)[number]
+  theme: Content["archiveThemes"][number]
   index: number
   onOpen: (photo: ArchivePhoto) => void
 }) {
+  const c = useContent()
+  const collection = useMemo(() => buildCollection(c), [c])
   const { photos } = theme
   // Documents are the pieces that would really sit under glass.
   const glazed = theme.id === "recognition-certificates"
@@ -318,7 +340,7 @@ function Room({
                 corners={glazed}
                 maxHeight="15rem"
               />
-              <p className="tick mt-[var(--s-3)] tabular-nums">{plateNumber(photo)}</p>
+              <p className="tick mt-[var(--s-3)] tabular-nums">{plateNumber(collection, photo, c.ui.plateNumber)}</p>
               <PlateLabel
                 title={photo.title}
                 year={photo.year}

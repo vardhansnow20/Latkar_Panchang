@@ -4,11 +4,12 @@ import { Register, Measure, ChapterMark } from "@/components/sky/Register"
 import { Horizon } from "@/components/sky/Horizon"
 import { Plate } from "@/components/sky/Plate"
 import { Figure, StarField } from "@/components/sky/Celestial"
-import { history, historyTimeline, historyPortrait } from "@/data/history"
+import { historyTimeline } from "@/data/history"
 import { rise, unveilSide, viewport } from "@/lib/motion"
 import { cn } from "@/lib/utils"
 import { useReducedMotion } from "@/hooks/useReducedMotion"
 import { onScrollFrame } from "@/lib/onScroll"
+import { useContent } from "@/i18n/LanguageProvider"
 
 const COUNT = historyTimeline.length
 /** Screens of scroll given to the orbit. One per milestone plus a
@@ -48,6 +49,7 @@ const SCENE_SCREENS = COUNT * 0.5 + 0.5
  * fallback rather than a degraded animation.
  */
 export function Descent() {
+  const c = useContent()
   const sceneRef = useRef<HTMLDivElement>(null)
   const prefersReducedMotion = useReducedMotion()
   const [active, setActive] = useState(0)
@@ -99,26 +101,29 @@ export function Descent() {
 
       <Measure size="wide" className="relative mb-[var(--s-6)]">
         <m.div initial="hidden" whileInView="visible" viewport={viewport} variants={rise}>
-          <p className="tick mb-[var(--s-3)]"><ChapterMark n={1} /> {history.eyebrow}</p>
-          <h2 className="mb-[var(--s-3)] text-chapter text-[var(--ink)]">{history.heading}</h2>
-          <p className="text-lead text-[var(--ink-soft)]">{history.intro}</p>
+          <p className="tick mb-[var(--s-3)]"><ChapterMark n={1} /> {c.history.eyebrow}</p>
+          <h2 className="mb-[var(--s-3)] text-chapter text-[var(--ink)]">{c.history.heading}</h2>
+          <p className="text-lead text-[var(--ink-soft)]">{c.history.intro}</p>
         </m.div>
 
-        {/* TEMPORARY — a stand-in portrait, to preview how a
-            photograph sits under this heading. See the note on
-            `historyPortrait` in data/history.ts. */}
-        <m.figure
+        {/* A plate from the family archive, beneath the heading. The
+            caption names the photograph, not the sitter — see the note
+            on `historyPortrait` in data/history.ts. */}
+        {/* The trigger sits on the wrapper and the wipe on the figure
+            inside it — never both on one element. See `unveilSide`. */}
+        <m.div
           initial="hidden"
           whileInView="visible"
           viewport={viewport}
-          variants={unveilSide}
           className="mt-[var(--s-5)] w-[54%] max-w-[13rem] sm:max-w-[15rem]"
         >
-          <Plate image={historyPortrait} mount="thin" interactive />
-          <figcaption className="mt-[var(--s-2)] text-note text-[var(--ink-faint)] italic">
-            Placeholder — awaiting an archival portrait.
-          </figcaption>
-        </m.figure>
+          <m.figure variants={unveilSide}>
+            <Plate image={c.historyPortrait} mount="thin" interactive />
+            <figcaption className="mt-[var(--s-2)] text-note text-[var(--ink-faint)]">
+              {c.historyPortraitCaption}
+            </figcaption>
+          </m.figure>
+        </m.div>
       </Measure>
 
       {prefersReducedMotion ? (
@@ -149,6 +154,7 @@ function Dial({
   rotation: MotionValue<number>
   active: number
 }) {
+  const c = useContent()
   const step = 360 / COUNT
   // One counter-rotation for every body, derived once. Deriving it
   // inside the map would call a hook per iteration — stable only by
@@ -179,7 +185,7 @@ function Dial({
           <div className="absolute inset-[18%] rounded-full border border-dashed border-[var(--color-brass-soft)]/15" />
 
           {/* Bodies, one per milestone, evenly spaced around the ring. */}
-          {historyTimeline.map((entry, i) => {
+          {c.historyTimeline.map((entry, i) => {
             const angle = i * step
             const isActive = i === active
             return (
@@ -227,7 +233,7 @@ function Dial({
           changes. Stacked in one grid cell so they crossfade in place
           without the layout shifting under them. */}
       <div className="relative grid px-[var(--gutter)] lg:ml-[46%] lg:max-w-[42rem] lg:px-0">
-        {historyTimeline.map((entry, i) => {
+        {c.historyTimeline.map((entry, i) => {
           const isActive = i === active
           return (
             <div
@@ -281,9 +287,10 @@ function Dial({
  * milestones as an ordinary sequence, which is what someone who has
  * asked for less movement actually wants. */
 function StaticList() {
+  const c = useContent()
   return (
     <div className="relative flex flex-col gap-[var(--s-7)]">
-      {historyTimeline.map((entry, i) => (
+      {c.historyTimeline.map((entry, i) => (
         <div key={entry.id}>
           <p className="tick mb-[var(--s-3)]">
             {String(i + 1).padStart(2, "0")} / {String(COUNT).padStart(2, "0")}

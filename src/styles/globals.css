@@ -155,6 +155,70 @@
   }
 }
 
+/**
+ * Marathi typography.
+ *
+ * Devanagari sets marks above and below the baseline — matras, the
+ * shirorekha, and conjuncts that descend — so leading tuned for Latin
+ * crowds it and the tightest display sizes collide outright. These
+ * rules apply only while the document is in Marathi, so the English
+ * metrics tuned across the rest of the design are untouched.
+ *
+ * Tracking is also neutralised: the wide letter-spacing that gives
+ * small-caps labels their character breaks Devanagari, which joins its
+ * glyphs along a headline rule rather than spacing them.
+ */
+/* Anchor landings clear the fixed masthead.
+ *
+ * Every nav link and every rail station is an in-page anchor, and the
+ * masthead is fixed and paints no background of its own. Without this
+ * a jump puts the target heading underneath it — the first line of the
+ * chapter title sits behind the blur and reads as clipped. Devanagari
+ * makes it worse, because its matras occupy the very top of the line
+ * box that ends up hidden. */
+/* How far the hero headline may be capped against viewport height.
+ *
+ * The headline is set at `min(--text-hero, var(--hero-cap))`. On a tall
+ * screen the cap never bites and the token governs. On a short one it
+ * does, which is what keeps a three-line title from pushing the call to
+ * action past the fold — measured at 1024x768, where the title wraps to
+ * three lines while 1366x768 needs only two. */
+:root {
+  --hero-cap: 14svh;
+}
+
+@media (max-height: 820px) {
+  :root {
+    --hero-cap: 12svh;
+  }
+}
+
+:target,
+section[id] {
+  scroll-margin-top: clamp(4.5rem, 6vw, 6.5rem);
+}
+
+html[lang="mr"] {
+  h1,
+  h2,
+  h3 {
+    line-height: 1.28;
+    letter-spacing: 0;
+  }
+
+  p,
+  li,
+  dd {
+    line-height: 1.85;
+  }
+
+  /* The tracked label style: keep the size and colour, drop the
+     spacing that would pull conjuncts apart. */
+  .tick {
+    letter-spacing: 0.04em;
+  }
+}
+
 @layer utilities {
   /* ---------------------------------------------------------------
    * Tone. A register declares the hour it sits at and inherits the

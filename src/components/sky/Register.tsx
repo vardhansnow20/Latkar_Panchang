@@ -1,5 +1,6 @@
 import type { ReactNode, Ref } from "react"
 import { cn } from "@/lib/utils"
+import { useLanguage } from "@/i18n/LanguageProvider"
 
 /**
  * A register is a band of the page at a given hour of the sunrise.
@@ -127,10 +128,18 @@ export function Measure({
  * are legible as subordinate at any width.
  */
 export function ChapterMark({ n }: { n: number }) {
-  const roman = ["I", "II", "III", "IV", "V", "VI", "VII"][n - 1] ?? String(n)
+  const { language } = useLanguage()
+  // Roman numerals are a Latin-script convention. On a Marathi page
+  // they are the one remaining run of Latin characters, and the site
+  // already numbers in Devanagari elsewhere — the astrolabe's limb and
+  // the five limbs both do — so the mark follows the language.
+  const numeral =
+    language === "mr"
+      ? (["१", "२", "३", "४", "५", "६", "७"][n - 1] ?? String(n))
+      : (["I", "II", "III", "IV", "V", "VI", "VII"][n - 1] ?? String(n))
   return (
     <span aria-hidden="true" className="inline-flex items-center gap-[var(--s-2)]">
-      <span className="text-[var(--metal)]">{roman}</span>
+      <span className="text-[var(--metal)]">{numeral}</span>
       <span className="inline-block h-px w-6 bg-[var(--hairline)] align-middle" />
     </span>
   )

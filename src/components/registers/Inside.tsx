@@ -1,14 +1,16 @@
-import { useRef, useState } from "react"
+import { useMemo, useRef, useState } from "react"
 import { m, useScroll, useTransform } from "framer-motion"
 import { Maximize2 } from "lucide-react"
 import { Register, Measure, ChapterMark } from "@/components/sky/Register"
 import { Plate } from "@/components/sky/Plate"
 import { Figure } from "@/components/sky/Celestial"
 import { Lightbox, type LightboxItem } from "@/components/sky/Lightbox"
-import { insideEdition, editionPlates, type EditionPlate } from "@/data/edition"
+import { type EditionPlate } from "@/data/edition"
 import { rise, unveil, unveilSide, sequence, viewport } from "@/lib/motion"
 import { cn } from "@/lib/utils"
 import { useReducedMotion } from "@/hooks/useReducedMotion"
+import { useContent } from "@/i18n/LanguageProvider"
+import type { Content } from "@/i18n/en"
 
 /**
  * The edition, opened — in four beats.
@@ -29,18 +31,26 @@ import { useReducedMotion } from "@/hooks/useReducedMotion"
  * legible as objects but not as documents.
  */
 
-/** The plates, in the shape the shared dialog expects. */
-const lightboxItems: LightboxItem[] = editionPlates.map((p) => ({
-  id: p.id,
-  title: p.title,
-  fullSrc: p.full.src,
-  alt: p.image.alt,
-  designation: p.designation,
-  description: p.note,
-}))
+/** The plates, in the shape the shared dialog expects.
+ *
+ * Built from the live content tree rather than at module scope: plate
+ * titles and notes are translated copy, and a module-scope constant is
+ * evaluated once at import and would freeze them in the language the
+ * page happened to load in. */
+const buildLightboxItems = (plates: Content["editionPlates"]): LightboxItem[] =>
+  plates.map((p) => ({
+    id: p.id,
+    title: p.title,
+    fullSrc: p.full.src,
+    alt: p.image.alt,
+    designation: p.designation,
+    description: p.note,
+  }))
 
 export function Inside() {
+  const c = useContent()
   const [openIndex, setOpenIndex] = useState<number | null>(null)
+  const lightboxItems = useMemo(() => buildLightboxItems(c.editionPlates), [c.editionPlates])
 
   return (
     /* Clipping is safe here — unlike Descent, this register has no
@@ -59,17 +69,17 @@ export function Inside() {
         variants={rise}
         className="relative mb-[var(--s-6)]"
       >
-        <p className="tick mb-[var(--s-3)]"><ChapterMark n={2} /> {insideEdition.eyebrow}</p>
+        <p className="tick mb-[var(--s-3)]"><ChapterMark n={2} /> {c.insideEdition.eyebrow}</p>
         <h2 className="mb-[var(--s-4)] max-w-[16ch] text-chapter text-[var(--ink)]">
-          {insideEdition.heading}
+          {c.insideEdition.heading}
         </h2>
         <Measure size="wide">
-          <p className="text-lead text-[var(--ink-soft)]">{insideEdition.intro}</p>
+          <p className="text-lead text-[var(--ink-soft)]">{c.insideEdition.intro}</p>
         </Measure>
       </m.div>
 
       <div className="relative flex flex-col gap-[var(--s-6)]">
-        {editionPlates.map((plate, i) => (
+        {c.editionPlates.map((plate, i) => (
           <Exhibit key={plate.id} plate={plate} index={i} onOpen={() => setOpenIndex(i)} />
         ))}
       </div>
@@ -104,6 +114,7 @@ function MountedPage({
   tilt: number
   className?: string
 }) {
+  const c = useContent()
   return (
     <div
       className={cn(
@@ -128,7 +139,7 @@ function MountedPage({
         className="pointer-events-none absolute right-[var(--s-3)] bottom-[var(--s-3)] flex items-center gap-[var(--s-2)] rounded-full bg-[color-mix(in_srgb,var(--color-indigo)_82%,transparent)] px-[var(--s-3)] py-[var(--s-2)] text-[var(--color-paper)] backdrop-blur-sm [@media(hover:hover)]:hidden"
       >
         <Maximize2 size={13} strokeWidth={1.75} />
-        <span className="tick text-[var(--color-paper)]">Tap to open</span>
+        <span className="tick text-[var(--color-paper)]">{c.ui.tapToOpen}</span>
       </span>
     </div>
   )
@@ -143,6 +154,7 @@ function Exhibit({
   index: number
   onOpen: () => void
 }) {
+  const c = useContent()
   const ref = useRef<HTMLElement>(null)
   const prefersReducedMotion = useReducedMotion()
 
@@ -249,7 +261,7 @@ function Exhibit({
                 <div className="relative">
                   <Plate image={plate.detail} mount="thin" glazed />
                   <span className="tick mt-[var(--s-2)] block text-[var(--ink-faint)]">
-                    Detail · the planetary columns
+                    {c.ui.detailPlanetary}
                   </span>
                 </div>
               </m.div>

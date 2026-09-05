@@ -1,5 +1,6 @@
 import { useMemo } from "react"
 import { MotionProvider } from "@/components/common/MotionProvider"
+import { LanguageProvider, useContent } from "@/i18n/LanguageProvider"
 import { SmoothScroll } from "@/components/sky/SmoothScroll"
 import { SkyCalibration } from "@/components/sky/SkyCalibration"
 import { Masthead, Colophon } from "@/components/sky/Masthead"
@@ -24,23 +25,28 @@ import { Calendar, Dusk, Almanac, Reach } from "@/components/registers/Present"
  * where it belongs. Everything you can actually obtain is last.
  */
 export default function App() {
+  return (
+    <LanguageProvider>
+      <Page />
+    </LanguageProvider>
+  )
+}
+
+/** Everything below the provider, so it can read the chosen language. */
+function Page() {
+  const c = useContent()
   // Named for the rule's use, which is wayfinding — these are the
   // words the reader sees beside the moon, so they are register
   // names rather than element ids.
   const registers = useMemo(
-    () => [
-      { id: "opening", label: "The Sky" },
-      { id: "descent", label: "A Hundred Years" },
-      { id: "inside", label: "Inside the Edition" },
-      { id: "contents", label: "The Pages" },
-      { id: "trust", label: "Why It Is Trusted" },
-      { id: "compilers", label: "The Compilers" },
-      { id: "archive", label: "The Archive" },
-      { id: "calendar", label: "The Calendar" },
-      { id: "almanac", label: "The App" },
-      { id: "reach", label: "Reach Us" },
-    ],
-    []
+    () =>
+      (
+        [
+          "opening", "descent", "inside", "contents", "trust",
+          "compilers", "archive", "calendar", "almanac", "reach",
+        ] as const
+      ).map((id) => ({ id, label: c.ui.rail[id] })),
+    [c.ui.rail]
   )
 
   return (
@@ -49,7 +55,7 @@ export default function App() {
         href="#contents-start"
         className="sr-only focus-visible:not-sr-only focus-visible:fixed focus-visible:top-4 focus-visible:left-4 focus-visible:z-50 focus-visible:bg-[var(--color-paper-raised)] focus-visible:px-4 focus-visible:py-2 focus-visible:text-[var(--color-ink)]"
       >
-        Skip to content
+        {c.ui.skipToContent}
       </a>
 
       <SmoothScroll />

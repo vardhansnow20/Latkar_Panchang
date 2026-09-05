@@ -173,7 +173,16 @@ export function Plate({
 }: PlateProps) {
   const [loaded, setLoaded] = useState(false)
   const img = useRef<HTMLImageElement>(null)
+  const frame = useRef<HTMLDivElement>(null)
   const { src, alt, aspectRatio } = image
+
+  /**
+   * Whether this plate is close enough to the viewport to be worth
+   * fetching. Starts false so nothing off-screen is requested, and is
+   * latched true on first approach — a plate that has been reached
+   * never goes back to unfetched.
+   */
+  const [near, setNear] = useState(false)
 
   /**
    * Catch the image that finished loading before React was listening.
@@ -188,11 +197,69 @@ export function Plate({
    * exactly the kind of bug that gets reported as "sometimes the
    * image isn't there".
    *
-   * `complete` is the synchronous truth the event cannot give us.
+   * `complete` is the synchronous truth the event cannot give us —
+   * but only once there is something to be complete *about*. An
+   * `<img>` with no `src` reports `complete: true`, so asking before
+   * the src is attached says yes and fades the plate up around an
+   * empty element: the browser then paints its broken-image glyph and
+   * spills the alt text across the mount until the file arrives.
+   * `naturalWidth` is the part that distinguishes a decoded image from
+   * an empty one.
    */
   useEffect(() => {
-    if (img.current?.complete) setLoaded(true)
-  }, [src])
+    const el = img.current
+    if (!el) return
+    setLoaded(Boolean(el.getAttribute("src")) && el.complete && el.naturalWidth > 0)
+  }, [src, near])
+
+  /**
+   * Decide for ourselves when to fetch, rather than trusting
+   * `loading="lazy"`.
+   *
+   * The browser's own lazy loading does not reliably fire here. Two
+   * plates on this page — the archival portrait in the history
+   * register and one archive photograph — were never requested at all,
+   * verified by watching the network while the image sat centred in
+   * the viewport for three seconds: no request, in headless and in a
+   * real window alike, with and without smooth scrolling. Flipping the
+   * same element to `eager` fetched it immediately, so the file, the
+   * URL and the markup were all fine; the heuristic simply never ran.
+   *
+   * That is ordinarily a slow image. Here it is an invisible one,
+   * because the plate fades in on `load` and a request that is never
+   * made produces no `load` — so the photograph stays at zero opacity
+   * for good, inside a correctly sized mount.
+   *
+   * So the `src` attribute itself is withheld until the plate is
+   * approached, and an observer we control decides when that is.
+   * Withholding `src` rather than toggling `loading` is deliberate:
+   * flipping an existing element from lazy to eager does not restart a
+   * load Chrome has already declined to begin, which was measured to
+   * leave all three plates exactly as blank as before. Setting `src`
+   * on an element that has none is an ordinary fetch, and that always
+   * runs.
+   */
+  useEffect(() => {
+    if (!src || near) return
+    const el = frame.current
+    if (!el || typeof IntersectionObserver === "undefined") {
+      setNear(true)
+      return
+    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          setNear(true)
+          observer.disconnect()
+        }
+      },
+      // A screen of warning, so a plate is already there by the time
+      // it is scrolled to rather than arriving underneath the reader.
+      { rootMargin: "100% 0px" }
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [src, near])
 
   return (
     <div
@@ -206,6 +273,7 @@ export function Plate({
     >
       {pinned && mount !== "none" && <Pin />}
       <div
+        ref={frame}
         className={cn(
           "relative overflow-hidden bg-[var(--color-paper-sunk)]",
           mount !== "none" && "plate-window rounded-[var(--radius-edge)]",
@@ -226,9 +294,14 @@ export function Plate({
         {src ? (
           <img
             ref={img}
-            src={src}
+            // Absent until approached — see the observer above.
+            src={near ? src : undefined}
             alt={alt}
-            loading="lazy"
+            // Not lazy: nothing is requested until `near` supplies the
+            // src, so the deferral has already happened by this point
+            // and leaving it lazy would only re-introduce the
+            // heuristic this works around.
+            loading="eager"
             decoding="async"
             onLoad={() => setLoaded(true)}
             // If decoding fails there is nothing to fade in to, but a
@@ -265,7 +338,7 @@ export function PlateLabel({
 }) {
   return (
     <figcaption className={cn("border-t border-[var(--hairline)] pt-[var(--s-2)]", className)}>
-      <span className="text-[var(--ink)]" style={{ fontFamily: "var(--font-display)" }}>
+      <span className="text-lead text-[var(--ink)]" style={{ fontFamily: "var(--font-display)" }}>
         {title}
       </span>
       {year && <span className="tick ml-[var(--s-2)]">{year}</span>}

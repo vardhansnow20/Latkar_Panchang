@@ -71,14 +71,26 @@
    * widely; Source Serif and Cambria catch the rest.
    *
    * The sans survives only for interface furniture. */
+  /* Devanagari families are appended to the Latin stacks rather than
+   * swapped in for Marathi.
+   *
+   * Font fallback is per-glyph, so Latin characters still resolve to
+   * the Latin serifs above and only Devanagari characters fall through
+   * to the families at the tail. English is therefore untouched, and
+   * Marathi picks up a *serif* Devanagari face that matches the
+   * page's voice — without this, Devanagari fell past the whole stack
+   * to the platform default, which on Windows is the sans Nirmala UI
+   * and reads as a different site. */
   --font-display: "Panchang Display", "Iowan Old Style", "Hoefler Text", "Sorts Mill Goudy",
-    Constantia, "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+    Constantia, "Palatino Linotype", Palatino, "Book Antiqua", Georgia,
+    "Tiro Devanagari Marathi", "Noto Serif Devanagari", "Sanskrit Text", "Nirmala UI", serif;
   --font-body: "Panchang Text", Charter, "Bitstream Charter", "Sitka Text", "Source Serif 4",
-    "Source Serif Pro", Cambria, "Iowan Old Style", Georgia, serif;
+    "Source Serif Pro", Cambria, "Iowan Old Style", Georgia,
+    "Tiro Devanagari Marathi", "Noto Serif Devanagari", "Sanskrit Text", "Nirmala UI", serif;
   --font-ui: ui-sans-serif, "Inter", "Segoe UI Variable Text", "Segoe UI", -apple-system,
-    "Helvetica Neue", Arial, sans-serif;
-  --font-devanagari: "Panchang Devanagari", "Tiro Devanagari Sanskrit", "Noto Serif Devanagari",
-    "Nirmala UI", serif;
+    "Helvetica Neue", Arial, "Nirmala UI", "Noto Sans Devanagari", sans-serif;
+  --font-devanagari: "Panchang Devanagari", "Tiro Devanagari Marathi",
+    "Tiro Devanagari Sanskrit", "Noto Serif Devanagari", "Sanskrit Text", "Nirmala UI", serif;
   --font-mono: ui-monospace, "Cascadia Mono", "SF Mono", "Roboto Mono", Consolas, monospace;
 
   --font-weight-regular: 400;

@@ -7,10 +7,8 @@ import { Plate } from "@/components/sky/Plate"
 import { Action } from "@/components/sky/Action"
 import { Figure, StarField } from "@/components/sky/Celestial"
 import { Lightbox } from "@/components/sky/Lightbox"
-import { laxmiCalendar } from "@/data/laxmiCalendar"
-import { mobileApp } from "@/data/mobileApp"
-import { contact } from "@/data/contact"
 import { rise, sequence, viewport } from "@/lib/motion"
+import { useContent } from "@/i18n/LanguageProvider"
 
 /**
  * The three daylight registers — the things you can hold, or will be
@@ -25,6 +23,7 @@ import { rise, sequence, viewport } from "@/lib/motion"
  * of a certain size and the page should say so.
  */
 export function Calendar() {
+  const c = useContent()
   const [open, setOpen] = useState(false)
 
   return (
@@ -36,18 +35,18 @@ export function Calendar() {
         variants={rise}
         className="mb-[var(--s-6)]"
       >
-        <p className="tick mb-[var(--s-3)]"><ChapterMark n={5} /> {laxmiCalendar.eyebrow}</p>
+        <p className="tick mb-[var(--s-3)]"><ChapterMark n={5} /> {c.laxmiCalendar.eyebrow}</p>
         <h2 className="mb-[var(--s-2)] max-w-[14ch] text-chapter text-[var(--ink)]">
-          {laxmiCalendar.heading}
+          {c.laxmiCalendar.heading}
         </h2>
         <p
           className="mb-[var(--s-4)] text-title text-[var(--metal)]"
           style={{ fontFamily: "var(--font-devanagari)" }}
         >
-          {laxmiCalendar.script}
+          {c.laxmiCalendar.script}
         </p>
         <Measure size="wide">
-          <p className="text-lead text-[var(--ink-soft)]">{laxmiCalendar.intro}</p>
+          <p className="text-lead text-[var(--ink-soft)]">{c.laxmiCalendar.intro}</p>
         </Measure>
       </m.div>
 
@@ -76,27 +75,27 @@ export function Calendar() {
               aria-label="View the Shree Laxmi Calendar full screen"
               className="block w-full cursor-zoom-in text-left"
             >
-              <Plate image={laxmiCalendar.image} mount="deep" glazed interactive />
+              <Plate image={c.laxmiCalendar.image} mount="deep" glazed interactive />
             </button>
             <span
               aria-hidden="true"
               className="pointer-events-none absolute right-[var(--s-3)] bottom-[var(--s-3)] flex items-center gap-[var(--s-2)] rounded-full bg-[color-mix(in_srgb,var(--color-indigo)_82%,transparent)] px-[var(--s-3)] py-[var(--s-2)] text-[var(--color-paper)] backdrop-blur-sm [@media(hover:hover)]:hidden"
             >
               <Maximize2 size={13} strokeWidth={1.75} />
-              <span className="tick text-[var(--color-paper)]">Tap to open</span>
+              <span className="tick text-[var(--color-paper)]">{c.ui.tapToOpen}</span>
             </span>
           </div>
         </div>
 
         <m.div initial="hidden" whileInView="visible" viewport={viewport} variants={rise}>
-          <p className="tick mb-[var(--s-3)] tabular-nums">{laxmiCalendar.plate.designation}</p>
+          <p className="tick mb-[var(--s-3)] tabular-nums">{c.laxmiCalendar.plate.designation}</p>
           <Measure className="mb-[var(--s-4)]">
-            <p className="text-body text-[var(--ink-soft)]">{laxmiCalendar.body}</p>
+            <p className="text-body text-[var(--ink-soft)]">{c.laxmiCalendar.body}</p>
           </Measure>
           <Measure className="mb-[var(--s-5)]">
-            <p className="text-note text-[var(--ink-soft)]">{laxmiCalendar.plate.note}</p>
+            <p className="text-note text-[var(--ink-soft)]">{c.laxmiCalendar.plate.note}</p>
           </Measure>
-          <Action href={laxmiCalendar.link.href}>{laxmiCalendar.link.label}</Action>
+          <Action href={c.laxmiCalendar.link.href}>{c.laxmiCalendar.link.label}</Action>
         </m.div>
       </div>
 
@@ -104,11 +103,11 @@ export function Calendar() {
         items={[
           {
             id: "laxmi-calendar",
-            title: laxmiCalendar.heading,
-            fullSrc: laxmiCalendar.full.src,
-            alt: laxmiCalendar.full.alt,
-            designation: laxmiCalendar.plate.designation,
-            description: laxmiCalendar.plate.note,
+            title: c.laxmiCalendar.heading,
+            fullSrc: c.laxmiCalendar.full.src,
+            alt: c.laxmiCalendar.full.alt,
+            designation: c.laxmiCalendar.plate.designation,
+            description: c.laxmiCalendar.plate.note,
           },
         ]}
         index={open ? 0 : null}
@@ -164,6 +163,7 @@ export function Dusk() {
  * honestly carry. See the TODO in data/mobileApp.ts.
  */
 export function Almanac() {
+  const c = useContent()
   return (
     <Register id="almanac" tone="night" height="open" className="overflow-hidden">
       <StarField count={30} className="absolute inset-0" />
@@ -186,22 +186,22 @@ export function Almanac() {
               about something forthcoming, and should read as one. */}
           <m.p variants={rise} className="tick mb-[var(--s-4)] flex items-center gap-[var(--s-3)]">
             <span className="inline-block size-[6px] rounded-full bg-[var(--color-brass)]" />
-            {mobileApp.eyebrow}
+            {c.mobileApp.eyebrow}
           </m.p>
           <m.h2
             variants={rise}
             className="mb-[var(--s-4)] max-w-[15ch] text-register text-[var(--ink)]"
           >
-            {mobileApp.heading}
+            {c.mobileApp.heading}
           </m.h2>
           <Measure size="wide" className="mb-[var(--s-5)]">
             <m.p variants={rise} className="text-lead text-[var(--ink-soft)]">
-              {mobileApp.body}
+              {c.mobileApp.body}
             </m.p>
           </Measure>
           <m.div variants={rise}>
-            <Action href={mobileApp.cta.href} weight="solid">
-              {mobileApp.cta.label}
+            <Action href={c.mobileApp.cta.href} weight="solid">
+              {c.mobileApp.cta.label}
             </Action>
           </m.div>
         </m.div>
@@ -226,7 +226,7 @@ export function Almanac() {
           />
           <div className="relative rounded-[2rem] border border-[var(--color-brass)]/35 bg-[color-mix(in_srgb,var(--color-indigo)_70%,transparent)] p-[var(--s-2)] shadow-[var(--depth-lift)] backdrop-blur-sm">
             <div className="overflow-hidden rounded-[1.6rem]">
-              <Plate image={mobileApp.screen} mount="none" />
+              <Plate image={c.mobileApp.screen} mount="none" />
             </div>
           </div>
         </m.div>
@@ -247,15 +247,16 @@ export function Almanac() {
  * dead link.
  */
 export function Reach() {
+  const c = useContent()
   const details = [
-    { label: "Address", value: contact.address },
-    { label: "Telephone", value: contact.phone },
-    ...(contact.email ? [{ label: "Email", value: contact.email }] : []),
+    { label: c.ui.labelAddress, value: c.contact.address },
+    { label: c.ui.labelTelephone, value: c.contact.phone },
+    ...(c.contact.email ? [{ label: "Email", value: c.contact.email }] : []),
   ]
 
-  const action = contact.email
-    ? { label: "Write to us", href: `mailto:${contact.email}` }
-    : { label: "Call us", href: `tel:${contact.phone.replace(/\s/g, "")}` }
+  const action = c.contact.email
+    ? { label: c.ui.actionWrite, href: `mailto:${c.contact.email}` }
+    : { label: c.ui.actionCall, href: `tel:${c.contact.phone.replace(/\s/g, "")}` }
 
   return (
     <Register id="reach" tone="night" height="vast" className="overflow-hidden">
@@ -273,13 +274,13 @@ export function Reach() {
         className="relative mx-auto flex max-w-[52ch] flex-col items-center text-center"
       >
         <m.p variants={rise} className="tick mb-[var(--s-4)]">
-          {contact.eyebrow}
+          {c.contact.eyebrow}
         </m.p>
         <m.h2 variants={rise} className="mb-[var(--s-4)] max-w-[14ch] text-register text-[var(--ink)]">
-          {contact.heading}
+          {c.contact.heading}
         </m.h2>
         <m.p variants={rise} className="mb-[var(--s-6)] text-lead text-[var(--ink-soft)]">
-          {contact.body}
+          {c.contact.body}
         </m.p>
 
         <m.dl variants={rise} className="mb-[var(--s-6)] flex flex-col items-center gap-[var(--s-4)]">

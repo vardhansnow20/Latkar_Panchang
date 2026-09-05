@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react"
 import { Menu, X } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { site, navLinks } from "@/data/site"
+import { useContent } from "@/i18n/LanguageProvider"
+import { LanguageToggle } from "@/components/sky/LanguageToggle"
 import { Moon } from "@/components/sky/Celestial"
 import { onScrollFrame } from "@/lib/onScroll"
 
@@ -65,6 +66,7 @@ function Sunburst({ className }: { className?: string }) {
 const MASTHEAD_LINE = 48
 
 export function Masthead() {
+  const c = useContent()
   const [scrolled, setScrolled] = useState(false)
   const [open, setOpen] = useState(false)
   const [current, setCurrent] = useState<string | null>(null)
@@ -76,7 +78,9 @@ export function Masthead() {
    * against the night sky in the hero. */
   const [tone, setTone] = useState("tone-night")
 
-  const ids = useMemo(() => navLinks.map((l) => l.href.replace(/^#/, "")), [])
+  // Section ids are language-independent — the anchors never change,
+  // only their labels do — so this must not re-subscribe on a switch.
+  const ids = useMemo(() => c.navLinks.map((l) => l.href.replace(/^#/, "")), [c.navLinks])
 
   useEffect(() => {
     const read = () => {
@@ -133,7 +137,7 @@ export function Masthead() {
         <a
           href="#opening"
           className="group/mark -my-[var(--s-2)] flex items-center gap-[var(--s-3)] py-[var(--s-2)]"
-          aria-label={`${site.name} — top`}
+          aria-label={`${c.site.name} — ${c.ui.home}`}
         >
           <Sunburst className="size-7 shrink-0 text-[var(--metal)] transition-transform duration-[1.4s] ease-[var(--ease)] group-hover/mark:rotate-45 sm:size-8" />
           <span className="flex flex-col leading-none">
@@ -149,15 +153,26 @@ export function Masthead() {
             >
               Panchang
             </span>
-            <span className="mt-[3px] text-[0.625rem] tracking-[0.3em] text-[var(--metal)] uppercase">
+            {/* Set in the display face like the two lines above it.
+                Without this it inherited the body serif and was the
+                only part of the lockup in a different family. */}
+            <span
+              className="mt-[3px] text-[0.625rem] tracking-[0.3em] text-[var(--metal)] uppercase"
+              style={{ fontFamily: "var(--font-display)" }}
+            >
               Since 1910
             </span>
           </span>
         </a>
 
-        <nav aria-label="Primary" className="hidden md:block">
-          <ul className="flex items-center gap-[var(--s-5)]">
-            {navLinks.map((link) => {
+        {/* xl, not md.
+            The full bar is seven links plus the language control and the
+            progress moon. Measured, that run needs about 1300px; shown
+            from md it ran to 1247px inside a 768px viewport and simply
+            left the screen. Below xl the sheet carries the same links. */}
+        <nav aria-label={c.ui.primaryNav} className="hidden xl:block">
+          <ul className="flex items-center gap-[var(--s-4)]">
+            {c.navLinks.map((link) => {
               const active = current === link.href.replace(/^#/, "")
               return (
                 <li key={link.href}>
@@ -165,7 +180,11 @@ export function Masthead() {
                     href={link.href}
                     aria-current={active ? "true" : undefined}
                     className={cn(
-                      "group/nav relative block py-[var(--s-2)] text-[0.78rem] tracking-[var(--tracking-wide)] uppercase transition-colors duration-[var(--t-quick)]",
+                      // min-width, because a label can be shorter than
+                      // the 24px WCAG 2.2 AA target: "अ‍ॅप" measures 19px
+                      // where the English "App" cleared it. Only the
+                      // shortest labels are affected.
+                      "group/nav relative block min-w-[24px] py-[var(--s-2)] text-center text-[0.78rem] tracking-[var(--tracking-wide)] uppercase transition-colors duration-[var(--t-quick)]",
                       active ? "text-[var(--ink)]" : "text-[var(--ink-faint)] hover:text-[var(--ink)]"
                     )}
                   >
@@ -184,6 +203,13 @@ export function Masthead() {
               )
             })}
 
+            {/* EN · मराठी, before the moon so the reader's own
+                choice sits nearer the links it changes. */}
+            <li className="ml-[var(--s-2)] flex items-center">
+              <span aria-hidden="true" className="mr-[var(--s-4)] h-4 w-px bg-[var(--hairline)]" />
+              <LanguageToggle />
+            </li>
+
             {/* The moon closes the nav, reporting how far through the
                 page the reader is. It is the same reading the degree
                 rule shows, kept here because the rule is hidden on
@@ -200,8 +226,8 @@ export function Masthead() {
           onClick={() => setOpen((v) => !v)}
           aria-expanded={open}
           aria-controls="masthead-menu"
-          aria-label={open ? "Close menu" : "Open menu"}
-          className="-m-[var(--s-3)] p-[var(--s-3)] text-[var(--ink)] md:hidden"
+          aria-label={open ? c.ui.menuClose : c.ui.menuOpen}
+          className="-m-[var(--s-3)] p-[var(--s-3)] text-[var(--ink)] xl:hidden"
         >
           {open ? <X size={20} strokeWidth={1.5} /> : <Menu size={20} strokeWidth={1.5} />}
         </button>
@@ -210,11 +236,11 @@ export function Masthead() {
       {open && (
         <nav
           id="masthead-menu"
-          aria-label="Primary"
-          className="bg-[color-mix(in_srgb,var(--color-indigo)_88%,transparent)] backdrop-blur-lg md:hidden"
+          aria-label={c.ui.primaryNav}
+          className="bg-[color-mix(in_srgb,var(--color-indigo)_88%,transparent)] backdrop-blur-lg xl:hidden"
         >
           <ul className="tone-night px-[var(--gutter)] py-[var(--s-2)]">
-            {navLinks.map((link) => (
+            {c.navLinks.map((link) => (
               <li key={link.href} className="border-t border-[var(--hairline)] first:border-t-0">
                 <a
                   href={link.href}
@@ -225,6 +251,14 @@ export function Masthead() {
                 </a>
               </li>
             ))}
+            {/* Kept inside the sheet rather than in the header bar:
+                on a 375px screen the wordmark and the menu button
+                already use the width, and a third control there
+                crowds both. */}
+            <li className="mt-[var(--s-2)] flex items-center justify-between border-t border-[var(--hairline)] pt-[var(--s-3)]">
+              <span className="tick text-[var(--ink-faint)]">{c.ui.language}</span>
+              <LanguageToggle />
+            </li>
           </ul>
         </nav>
       )}
@@ -242,15 +276,16 @@ export function Masthead() {
  * and dropped the colophon to 3.6:1.
  */
 export function Colophon() {
+  const c = useContent()
   return (
     <footer className="tone-night relative">
       <div className="mx-auto w-full max-w-[var(--frame)] px-[var(--gutter)] pb-[var(--s-5)] pl-[calc(var(--gutter)+var(--rule-channel))]">
         <div className="rule mb-[var(--s-4)] h-px w-full" />
         <div className="flex flex-col gap-[var(--s-3)] sm:flex-row sm:items-baseline sm:justify-between">
           <p className="text-note text-[var(--ink-faint)]">
-            © {new Date().getFullYear()} {site.name}
+            © {new Date().getFullYear()} {c.site.name}
           </p>
-          <p className="tick text-[var(--ink-faint)]">{site.tagline}</p>
+          <p className="tick text-[var(--ink-faint)]">{c.site.tagline}</p>
         </div>
       </div>
     </footer>

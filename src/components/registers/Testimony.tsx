@@ -2,16 +2,20 @@ import { m } from "framer-motion"
 import { Register, Measure, ChapterMark } from "@/components/sky/Register"
 import { Plate } from "@/components/sky/Plate"
 import { Figure } from "@/components/sky/Celestial"
-import { about } from "@/data/about"
-import { trustJourney, journeyStages, type JourneyStage } from "@/data/trustJourney"
-import { heroPhoto, archiveThemes } from "@/data/legacyArchive"
+import { type JourneyStage } from "@/data/trustJourney"
 import { rise, unveilSide, sequence, viewport } from "@/lib/motion"
 import { cn } from "@/lib/utils"
+import { useMemo } from "react"
+import { useContent } from "@/i18n/LanguageProvider"
+import type { Content } from "@/i18n/en"
+import type { ArchivePhoto } from "@/types/content"
 
 /** Photographs are referenced by id rather than duplicated, so the
  * archive stays the single source for every caption and alt text. */
-const collection = [heroPhoto, ...archiveThemes.flatMap((t) => t.photos)]
-const archivePhotoById = (id: string) => collection.find((p) => p.id === id)
+const buildPhotoIndex = (c: Content) => {
+  const all = [c.heroPhoto, ...c.archiveThemes.flatMap((t) => t.photos)]
+  return (id: string) => all.find((p) => p.id === id)
+}
 
 /**
  * The two morning registers: why the book is trusted, and who makes
@@ -29,6 +33,8 @@ const archivePhotoById = (id: string) => collection.find((p) => p.id === id)
  * text on the page. The claims are the evidence; they get the room.
  */
 export function Trust() {
+  const c = useContent()
+  const archivePhotoById = useMemo(() => buildPhotoIndex(c), [c])
   return (
     <Register id="trust" tone="morning" height="vast" className="overflow-hidden">
       {/* Parchment: a warm field laid over the sky, so this register
@@ -58,12 +64,12 @@ export function Trust() {
         variants={rise}
         className="relative mb-[var(--s-6)]"
       >
-        <p className="tick mb-[var(--s-3)]"><ChapterMark n={3} /> {trustJourney.eyebrow}</p>
+        <p className="tick mb-[var(--s-3)]"><ChapterMark n={3} /> {c.trustJourney.eyebrow}</p>
         <h2 className="mb-[var(--s-4)] max-w-[16ch] text-chapter text-[var(--ink)]">
-          {trustJourney.heading}
+          {c.trustJourney.heading}
         </h2>
         <Measure size="wide">
-          <p className="text-lead text-[var(--ink-soft)]">{trustJourney.intro}</p>
+          <p className="text-lead text-[var(--ink-soft)]">{c.trustJourney.intro}</p>
         </Measure>
       </m.div>
 
@@ -79,8 +85,8 @@ export function Trust() {
           className="absolute inset-y-0 left-[7px] w-px bg-[var(--hairline)] lg:left-[11px]"
         />
 
-        {journeyStages.map((stage, i) => (
-          <Stage key={stage.id} stage={stage} index={i} last={i === journeyStages.length - 1} />
+        {c.journeyStages.map((stage, i) => (
+          <Stage key={stage.id} stage={stage} index={i} last={i === c.journeyStages.length - 1} photoOf={archivePhotoById} />
         ))}
       </ol>
     </Register>
@@ -99,12 +105,14 @@ function Stage({
   stage,
   index,
   last,
+  photoOf,
 }: {
   stage: JourneyStage
   index: number
   last: boolean
+  photoOf: (id: string) => ArchivePhoto | undefined
 }) {
-  const photo = stage.photoId ? archivePhotoById(stage.photoId) : undefined
+  const photo = stage.photoId ? photoOf(stage.photoId) : undefined
   // Documents and certificates go under glass; photographs of people
   // and places do not — the distinction is what keeps the treatment
   // meaningful rather than decorative.
@@ -172,7 +180,7 @@ function Stage({
         </div>
       ) : (
         /* An honest gap. The stage keeps its place on the thread; the
-           reason it is empty lives in data/trustJourney.ts. */
+           reason it is empty lives in data/c.trustJourney.ts. */
         <m.p variants={rise} className="text-note text-[var(--ink-faint)] italic">
           Awaiting material from the archive.
         </m.p>
@@ -188,6 +196,7 @@ function Stage({
  * wider than the measure it interrupts.
  */
 export function Compilers() {
+  const c = useContent()
   return (
     <Register id="compilers" tone="morning" height="open" className="overflow-hidden">
       <m.div
@@ -197,19 +206,21 @@ export function Compilers() {
         variants={rise}
         className="mb-[var(--s-5)]"
       >
-        <p className="tick mb-[var(--s-3)]">{about.eyebrow}</p>
-        <h2 className="max-w-[18ch] text-register text-[var(--ink)]">{about.heading}</h2>
+        <p className="tick mb-[var(--s-3)]">{c.about.eyebrow}</p>
+        <h2 className="max-w-[18ch] text-register text-[var(--ink)]">{c.about.heading}</h2>
       </m.div>
 
       <div className="lg:flex lg:gap-[var(--s-6)]">
+        {/* Trigger outside, wipe inside — see `unveilSide`. */}
         <m.div
           initial="hidden"
           whileInView="visible"
           viewport={viewport}
-          variants={unveilSide}
           className="mb-[var(--s-4)] w-[46%] max-w-[12rem] lg:mb-0 lg:order-2 lg:w-[16rem] lg:max-w-none lg:shrink-0"
         >
-          <Plate image={about.portrait} mount="thin" />
+          <m.div variants={unveilSide}>
+            <Plate image={c.about.portrait} mount="thin" />
+          </m.div>
         </m.div>
 
         <div className="lg:order-1">
@@ -221,7 +232,7 @@ export function Compilers() {
               variants={rise}
               className="mb-[var(--s-4)] text-lead text-[var(--ink-soft)]"
             >
-              {about.intro}
+              {c.about.intro}
             </m.p>
             <m.p
               initial="hidden"
@@ -230,7 +241,7 @@ export function Compilers() {
               variants={rise}
               className="text-body text-[var(--ink-soft)]"
             >
-              {about.body[0]}
+              {c.about.body[0]}
             </m.p>
           </Measure>
 
@@ -242,7 +253,7 @@ export function Compilers() {
             className="my-[var(--s-6)] max-w-[24ch] text-title text-[var(--ink)] lg:max-w-[30ch]"
             style={{ fontFamily: "var(--font-display)" }}
           >
-            &ldquo;{about.pullQuote}&rdquo;
+            &ldquo;{c.about.pullQuote}&rdquo;
           </m.blockquote>
 
           <Measure>
@@ -253,7 +264,7 @@ export function Compilers() {
               variants={rise}
               className="text-body text-[var(--ink-soft)]"
             >
-              {about.body[1]}
+              {c.about.body[1]}
             </m.p>
 
             <m.details
@@ -264,10 +275,10 @@ export function Compilers() {
               className="group mt-[var(--s-4)]"
             >
               <summary className="tick -my-[var(--s-2)] cursor-pointer list-none py-[var(--s-2)] transition-colors hover:text-[var(--ink)]">
-                Read the full succession
+                {c.ui.readFullSuccession}
               </summary>
               <p className="mt-[var(--s-3)] text-body text-[var(--ink-soft)]">
-                {about.expandableDetail}
+                {c.about.expandableDetail}
               </p>
             </m.details>
           </Measure>

@@ -109,7 +109,11 @@ export function Gallery({
           "sm:flex sm:gap-[var(--s-5)] sm:overflow-x-auto sm:overflow-y-hidden",
           // Vertical padding on both edges: a rail clips its own
           // overflow, and every plate's pin stands proud of its top.
-          "sm:snap-x sm:snap-mandatory sm:pt-[var(--s-3)] sm:pb-[var(--s-3)]",
+          // The foot has to clear the stagger as well as the pin. Alternate
+          // pieces are pushed down by `--s-4`, and a rail with
+          // `overflow-y-hidden` cut exactly that much off the bottom of
+          // every offset piece — which is where its caption sits.
+          "sm:snap-x sm:snap-mandatory sm:pt-[var(--s-3)] sm:pb-[calc(var(--s-4)+var(--s-3))]",
           // The scrollbar is replaced by the brass rule below.
           "sm:[-ms-overflow-style:none] sm:[scrollbar-width:none] sm:[&::-webkit-scrollbar]:hidden",
           single && "sm:justify-start"

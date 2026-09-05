@@ -25,3 +25,7 @@ dist-ssr
 
 # Bug-report media: kept out of public/ so it is never deployed.
 bug-uploads/
+
+# Screenshots from scripts/review-shots.mjs — build artefacts for
+# review, regenerated on demand.
+review-shots/

@@ -33,7 +33,7 @@ export function Action({
         href={href}
         className={cn(
           "group/cta relative inline-flex items-center gap-[var(--s-3)] overflow-hidden rounded-full",
-          "px-[clamp(1.75rem,4vw,2.75rem)] py-[clamp(0.95rem,1.6vw,1.35rem)] text-[1.02rem]",
+          "px-[clamp(1.15rem,4vw,2.75rem)] py-[clamp(0.85rem,1.6vw,1.35rem)] text-body",
           "text-[var(--color-indigo)] transition-[transform,box-shadow] duration-[var(--t-reveal)] ease-[var(--ease)]",
           "hover:-translate-y-0.5 hover:shadow-[0_1px_0_rgba(255,248,230,0.7)_inset,0_-1px_0_rgba(90,66,30,0.35)_inset,0_18px_46px_-14px_rgba(176,141,87,0.95),0_3px_10px_rgba(20,24,40,0.4)]",
           "focus-visible:-translate-y-0.5",

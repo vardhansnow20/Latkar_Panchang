@@ -2,11 +2,12 @@ import { useEffect, useRef, useState } from "react"
 import { m, useMotionValue, type MotionValue } from "framer-motion"
 import { Register, Measure } from "@/components/sky/Register"
 import { Figure, StarField } from "@/components/sky/Celestial"
-import { elements, panchangElements, type PanchangElement } from "@/data/elements"
+import { panchangElements, type PanchangElement } from "@/data/elements"
 import { rise, sequence, viewport } from "@/lib/motion"
 import { cn } from "@/lib/utils"
 import { useReducedMotion } from "@/hooks/useReducedMotion"
 import { onScrollFrame } from "@/lib/onScroll"
+import { useContent } from "@/i18n/LanguageProvider"
 
 /**
  * What a Panchang is, and the five limbs it is made of.
@@ -58,6 +59,7 @@ const SCENE_SCREENS = COUNT * 0.35 + 0.35
 const NUMERALS = ["१", "२", "३", "४", "५"]
 
 export function Elements() {
+  const c = useContent()
   const sceneRef = useRef<HTMLDivElement>(null)
   const prefersReducedMotion = useReducedMotion()
   const [active, setActive] = useState(0)
@@ -102,14 +104,14 @@ export function Elements() {
         variants={rise}
         className="relative mb-[var(--s-5)]"
       >
-        <p className="tick mb-[var(--s-3)]">{elements.eyebrow}</p>
+        <p className="tick mb-[var(--s-3)]">{c.elements.eyebrow}</p>
         <h2 className="mb-[var(--s-4)] max-w-[16ch] text-register text-[var(--ink)]">
-          {elements.heading}
+          {c.elements.heading}
         </h2>
         <Measure size="wide">
           {/* A drop cap, as a museum wall text would set it. */}
           <p className="text-lead text-[var(--ink-soft)] [&::first-letter]:float-left [&::first-letter]:mt-[0.08em] [&::first-letter]:mr-[0.09em] [&::first-letter]:font-[family-name:var(--font-display)] [&::first-letter]:text-[3.4em] [&::first-letter]:leading-[0.78] [&::first-letter]:text-[var(--metal)]">
-            {elements.definition}
+            {c.elements.definition}
           </p>
         </Measure>
       </m.div>
@@ -135,6 +137,7 @@ function Wheel({
   rotation: MotionValue<number>
   active: number
 }) {
+  const c = useContent()
   const step = 360 / COUNT
 
   return (
@@ -155,7 +158,7 @@ function Wheel({
           <div className="absolute inset-0 rounded-full border border-[var(--color-brass)]/22" />
           <div className="absolute inset-[13%] rounded-full border border-dashed border-[var(--color-brass-soft)]/14" />
 
-          {panchangElements.map((el, i) => {
+          {c.panchangElements.map((el, i) => {
             const angle = i * step
             const lit = i === active
             return (
@@ -189,7 +192,7 @@ function Wheel({
           one is visually foremost changes, so the section reads
           correctly to a screen reader and to search. */}
       <ol className="relative grid w-full place-items-center">
-        {panchangElements.map((el, i) => (
+        {c.panchangElements.map((el, i) => (
           <li
             key={el.id}
             aria-current={i === active ? "true" : undefined}
@@ -217,14 +220,18 @@ function Limb({ element, index }: { element: PanchangElement; index: number }) {
     <>
       <span
         aria-hidden="true"
-        className="mb-[var(--s-3)] block text-[clamp(3.5rem,17vw,7rem)] leading-none text-[var(--color-brass-soft)]"
+        // `leading-none` clips Devanagari: the numeral's own line box
+        // ran 130px tall inside a 112px slot, so the matra above the
+        // glyph was cut. Devanagari sets marks above and below the
+        // baseline and needs the room even at display size.
+        className="mb-[var(--s-3)] block text-[clamp(3.5rem,17vw,7rem)] leading-[1.25] text-[var(--color-brass-soft)]"
         style={{ fontFamily: "var(--font-devanagari)" }}
       >
         {NUMERALS[index]}
       </span>
 
       <span
-        className="block text-[clamp(3rem,14vw,6rem)] leading-[1.05] text-[var(--color-brass-soft)]"
+        className="block text-[clamp(3rem,14vw,6rem)] leading-[1.35] text-[var(--color-brass-soft)]"
         style={{ fontFamily: "var(--font-devanagari)" }}
       >
         {element.script}
@@ -255,6 +262,7 @@ function Limb({ element, index }: { element: PanchangElement; index: number }) {
 
 /** The honest fallback under reduced motion: the five, plainly. */
 function StaticRow() {
+  const c = useContent()
   return (
     <m.ol
       initial="hidden"
@@ -263,7 +271,7 @@ function StaticRow() {
       variants={sequence}
       className="relative grid gap-[var(--s-5)] sm:grid-cols-3 lg:grid-cols-5"
     >
-      {panchangElements.map((el, i) => (
+      {c.panchangElements.map((el, i) => (
         <m.li key={el.id} variants={rise} className="flex flex-col items-center text-center">
           <span
             className="text-[2.6rem] leading-none text-[var(--color-brass-soft)]"

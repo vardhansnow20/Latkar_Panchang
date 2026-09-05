@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react"
 import { cn } from "@/lib/utils"
 import { onScrollFrame } from "@/lib/onScroll"
 import { Moon } from "@/components/sky/Celestial"
+import { useContent } from "@/i18n/LanguageProvider"
 
 /**
  * The reader's position through the journey, down the left margin.
@@ -32,6 +33,7 @@ interface RegisterRef {
 }
 
 export function DegreeRule({ registers }: { registers: RegisterRef[] }) {
+  const c = useContent()
   const [progress, setProgress] = useState(0)
   const [current, setCurrent] = useState<string | null>(null)
   const [stations, setStations] = useState<{ id: string; label: string; at: number }[]>([])
@@ -40,15 +42,34 @@ export function DegreeRule({ registers }: { registers: RegisterRef[] }) {
   useEffect(() => {
     const measure = () => {
       const docH = document.body.scrollHeight || 1
-      setStations(
-        registers
-          .map((r) => {
-            const el = document.getElementById(r.id)
-            if (!el) return null
-            return { id: r.id, label: r.label, at: (el.offsetTop + el.offsetHeight / 2) / docH }
-          })
-          .filter((s): s is { id: string; label: string; at: number } => s !== null)
-      )
+      const placed = registers
+        .map((r) => {
+          const el = document.getElementById(r.id)
+          if (!el) return null
+          return { id: r.id, label: r.label, at: (el.offsetTop + el.offsetHeight / 2) / docH }
+        })
+        .filter((s): s is { id: string; label: string; at: number } => s !== null)
+
+      // Enforce a floor on the gap between neighbouring stations.
+      //
+      // A station sits at its register's midpoint, which is honest but
+      // collides when a short register follows a long one: the App note
+      // is a fraction of the page, so its dot landed within a few pixels
+      // of Reach's and the two 18px hit areas overlapped outright —
+      // measured at 20px of overlap, which makes the pair unclickable
+      // with any confidence. Nudging the later one down preserves the
+      // order and the approximate position while separating the targets.
+      const MIN_GAP = 0.07
+      for (let i = 1; i < placed.length; i++) {
+        const gap = placed[i].at - placed[i - 1].at
+        if (gap < MIN_GAP) placed[i].at = placed[i - 1].at + MIN_GAP
+      }
+      // If the nudging pushed the last station past the rail, walk the
+      // whole run back up rather than letting it fall off the end.
+      const overshoot = placed.length ? placed[placed.length - 1].at - 1 : 0
+      if (overshoot > 0) for (const s of placed) s.at -= overshoot
+
+      setStations(placed)
     }
     measure()
     window.addEventListener("resize", measure)
@@ -108,7 +129,7 @@ export function DegreeRule({ registers }: { registers: RegisterRef[] }) {
         />
 
         {/* One dot per chapter — a destination, not a graduation. */}
-        <nav aria-label="Chapters" className="pointer-events-auto absolute inset-0">
+        <nav aria-label={c.ui.chapters} className="pointer-events-auto absolute inset-0">
           <ul className="relative h-full">
             {stations.map((s) => {
               const active = current === s.id
@@ -134,12 +155,24 @@ export function DegreeRule({ registers }: { registers: RegisterRef[] }) {
                             : "size-[3px] bg-[var(--ink-faint)]/50 group-hover/station:bg-[var(--color-brass)]"
                       )}
                     />
+                    {/* Shown on approach only, never for the active
+                        station.
+
+                        The channel is 72px wide and these labels run to
+                        130px, so a permanently-visible name does not sit
+                        in the margin — it prints across the article.
+                        Measured at 1440px, the active label reached 61px
+                        into the reading column and was drawn over the
+                        pull-quote. Position is already carried by the
+                        dot, which enlarges and takes a brass glow; the
+                        name is for when someone points at the rail
+                        meaning to use it, and a momentary overlap during
+                        that gesture is what the reader has asked for. */}
                     <span
                       className={cn(
-                        "tick whitespace-nowrap transition-[opacity,transform] duration-[var(--t-reveal)] ease-[var(--ease)]",
-                        active
-                          ? "translate-x-0 opacity-100"
-                          : "-translate-x-1 opacity-0 group-hover/station:translate-x-0 group-hover/station:opacity-100 group-focus-visible/station:translate-x-0 group-focus-visible/station:opacity-100"
+                        "tick -translate-x-1 whitespace-nowrap opacity-0 transition-[opacity,transform] duration-[var(--t-reveal)] ease-[var(--ease)]",
+                        "group-hover/station:translate-x-0 group-hover/station:opacity-100",
+                        "group-focus-visible/station:translate-x-0 group-focus-visible/station:opacity-100"
                       )}
                     >
                       {s.label}

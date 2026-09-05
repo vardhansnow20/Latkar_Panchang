@@ -1,4 +1,5 @@
 import type { TimelineEntry } from "@/types/content"
+import { asset } from "@/lib/asset"
 
 /**
  * Source: Kolhapur_Latkar_Panchang_English_Translation.docx,
@@ -6,21 +7,27 @@ import type { TimelineEntry } from "@/types/content"
  * names are as given in that document.
  */
 /**
- * TEMPORARY — a stand-in portrait beneath the History heading, added
- * at the client's request to preview how a photograph sits there.
+ * A studio photograph from the family's archive, on its printed mount.
+ * The photographer's imprint reads S. B. Takalkar, G.D. Art (Bom.),
+ * Shivaji Udyamnagar, Kolhapur.
  *
- * It is a drawn placeholder, not a photograph: it holds the exact
- * shape and tone a real archival portrait will occupy without
- * committing someone else's image into the repository. Replace by
- * pointing `src` at the real file; nothing else needs to change.
+ * The caption deliberately does not name the sitter. The client
+ * supplied the plate without an attribution, and putting a name under
+ * a face on the strength of a guess is the one mistake an archive
+ * cannot walk back.
  *
- * TODO — remove or replace once the client supplies a real portrait.
+ * TODO — client to identify the sitter and the year, after which the
+ * caption below can say so.
  */
 export const historyPortrait = {
-  src: "/placeholder/dummy-portrait.svg",
-  alt: "Placeholder portrait — awaiting an archival photograph from the client",
-  aspectRatio: 4 / 5,
+  src: asset("legacy-archive/studio-portrait-mounted.webp"),
+  alt: "A mounted studio photograph from the Latkar family archive, photographed by S. B. Takalkar of Kolhapur",
+  aspectRatio: 942 / 1300,
 }
+
+/** The caption shown beneath it. Names the plate, not the sitter. */
+export const historyPortraitCaption =
+  "From the family archive · S. B. Takalkar, Kolhapur"
 
 export const history = {
   eyebrow: "Our History",
@@ -36,8 +43,23 @@ export const historyTimeline: TimelineEntry[] = [
     year: "1910",
     title: "Founding",
     body: "Kolhapur Latkar Panchang was first compiled by the late Pandit Shankar Ganesh Latkar, a distinguished scholar of Dharmashastra and hereditary priest of Shri Mahalakshmi Temple, Kolhapur.",
-    // TODO image: "Founder Portrait" — Pandit Shankar Ganesh Latkar. Client to supply.
-    image: { src: null, alt: "Pandit Shankar Ganesh Latkar, founder of the Kolhapur Latkar Panchang", aspectRatio: 4 / 5 },
+    /**
+     * A painted portrait, signed SNK and dated 1977 — made well after
+     * the founder's lifetime, as a commemorative portrait would be.
+     *
+     * Identified as the founder from the filename the client supplied
+     * ("Ganesh_latkar"), which matches Shankar Ganesh Latkar. That is
+     * an inference from a filename, not a statement from the source
+     * document, so it is flagged rather than assumed settled.
+     *
+     * TODO — client to confirm the sitter before this caption is
+     * treated as final.
+     */
+    image: {
+      src: asset("legacy-archive/founder-portrait-painting.webp"),
+      alt: "A painted portrait of the Panchang's founder, signed SNK and dated 1977",
+      aspectRatio: 1290 / 1300,
+    },
   },
   {
     id: "second-generation",

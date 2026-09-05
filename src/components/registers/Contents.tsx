@@ -1,17 +1,12 @@
+import { useMemo } from "react"
 import { m } from "framer-motion"
 import { Register, Measure } from "@/components/sky/Register"
 import { Gallery } from "@/components/sky/Gallery"
 import { Plate } from "@/components/sky/Plate"
 import { Figure } from "@/components/sky/Celestial"
-import {
-  explore,
-  revealImage,
-  closeUpImage,
-  interiorPages,
-  calendarPageImage,
-  latestEditionImage,
-} from "@/data/explore"
 import { rise, sequence, viewport } from "@/lib/motion"
+import { useContent } from "@/i18n/LanguageProvider"
+import type { Content } from "@/i18n/en"
 
 /**
  * What the book actually contains, opened one page at a time.
@@ -30,15 +25,22 @@ import { rise, sequence, viewport } from "@/lib/motion"
  * detail, the three interior page types, a full month, and the
  * edition on the shelf today. Assembled from the existing data so
  * captions and alt text keep their single source. */
-const pageWalk = [
-  { id: "reveal", image: revealImage.image, caption: revealImage.caption, mount: "deep" as const },
-  { id: "close-up", image: closeUpImage.image, caption: closeUpImage.caption, mount: "thin" as const },
-  ...interiorPages.map((p) => ({ id: p.id, image: p.image, caption: p.caption, mount: "thin" as const })),
-  { id: "calendar-page", image: calendarPageImage.image, caption: calendarPageImage.caption, mount: "deep" as const },
-  { id: "latest", image: latestEditionImage.image, caption: latestEditionImage.caption, mount: "deep" as const },
+/** The walk through the edition, built from the live content tree.
+ *
+ * Every caption here is translated copy, so this cannot be a
+ * module-scope constant: that is evaluated once at import and would
+ * pin the sequence to whichever language the page first loaded in. */
+const buildPageWalk = (c: Content) => [
+  { id: "reveal", image: c.revealImage.image, caption: c.revealImage.caption, mount: "deep" as const },
+  { id: "close-up", image: c.closeUpImage.image, caption: c.closeUpImage.caption, mount: "thin" as const },
+  ...c.interiorPages.map((p) => ({ id: p.id, image: p.image, caption: p.caption, mount: "thin" as const })),
+  { id: "calendar-page", image: c.calendarPageImage.image, caption: c.calendarPageImage.caption, mount: "deep" as const },
+  { id: "latest", image: c.latestEditionImage.image, caption: c.latestEditionImage.caption, mount: "deep" as const },
 ]
 
 export function Contents() {
+  const c = useContent()
+  const pageWalk = useMemo(() => buildPageWalk(c), [c])
   return (
     <Register id="contents" tone="dawn" height="vast" className="overflow-hidden">
       <Figure
@@ -53,12 +55,12 @@ export function Contents() {
         variants={rise}
         className="relative mb-[var(--s-6)]"
       >
-        <p className="tick mb-[var(--s-3)]">{explore.eyebrow}</p>
+        <p className="tick mb-[var(--s-3)]">{c.explore.eyebrow}</p>
         <h2 className="mb-[var(--s-3)] max-w-[16ch] text-register text-[var(--ink)]">
-          {explore.heading}
+          {c.explore.heading}
         </h2>
         <Measure size="wide">
-          <p className="text-lead text-[var(--ink-soft)]">{explore.intro}</p>
+          <p className="text-lead text-[var(--ink-soft)]">{c.explore.intro}</p>
         </Measure>
       </m.div>
 
@@ -80,7 +82,7 @@ export function Contents() {
         variants={sequence}
         className="relative"
       >
-        <Gallery label={explore.heading} itemWidth="clamp(12rem, 21vw, 17rem)">
+        <Gallery label={c.explore.heading} itemWidth="clamp(12rem, 21vw, 17rem)">
           {pageWalk.map((page) => (
             <m.figure key={page.id} variants={rise}>
               <Plate image={page.image} mount={page.mount} maxHeight="15rem" />

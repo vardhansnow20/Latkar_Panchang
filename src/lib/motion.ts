@@ -78,6 +78,22 @@ export const unveil: Variants = {
 /** The same unveiling drawn sideways, for plates that enter beside
  * their text rather than beneath it. Unit-consistent for the reason
  * given above. */
+/**
+ * A wipe in from the left edge.
+ *
+ * Put this on a *child* of the element carrying `whileInView`, never on
+ * that element itself. Its hidden state is `inset(0% 100% 0% 0%)`,
+ * which clips the element to nothing — and an element clipped to
+ * nothing does not intersect anything, so the observer that would
+ * reveal it can never fire. It stays clipped for good.
+ *
+ * That deadlock is quiet, because the markup, the layout box and the
+ * computed opacity all look healthy: `getBoundingClientRect` ignores
+ * clipping and happily reports a 221x305 box on screen. It also takes
+ * any image inside down with it, since lazy loading is built on the
+ * same observer — two photographs on this page were never so much as
+ * requested.
+ */
 export const unveilSide: Variants = {
   hidden: { clipPath: "inset(0% 100% 0% 0%)" },
   visible: { clipPath: "inset(0% 0% 0% 0%)", transition: { duration: 1.2, ease: EASE } },

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef } from "react"
 import { X, ChevronLeft, ChevronRight } from "lucide-react"
+import { useContent } from "@/i18n/LanguageProvider"
 
 /**
  * Full-bleed viewing for any artifact on the site.
@@ -40,6 +41,7 @@ export function Lightbox({
   onClose: () => void
   onNavigate: (i: number) => void
 }) {
+  const c = useContent()
   const isOpen = index !== null
   const item = isOpen ? items[index] : null
   const panelRef = useRef<HTMLDivElement>(null)
@@ -95,7 +97,7 @@ export function Lightbox({
         <button
           type="button"
           onClick={onClose}
-          aria-label="Close"
+          aria-label={c.ui.close}
           className="-m-[var(--s-2)] p-[var(--s-2)] text-[var(--ink-soft)] transition-colors hover:text-[var(--ink)]"
         >
           <X size={22} strokeWidth={1.5} />
@@ -116,7 +118,7 @@ export function Lightbox({
           <button
             type="button"
             onClick={() => go(-1)}
-            aria-label="Previous"
+            aria-label={c.ui.previous}
             className="-m-[var(--s-2)] p-[var(--s-2)] text-[var(--ink-soft)] transition-colors hover:text-[var(--ink)]"
           >
             <ChevronLeft size={22} strokeWidth={1.5} />
@@ -127,7 +129,7 @@ export function Lightbox({
           <button
             type="button"
             onClick={() => go(1)}
-            aria-label="Next"
+            aria-label={c.ui.next}
             className="-m-[var(--s-2)] p-[var(--s-2)] text-[var(--ink-soft)] transition-colors hover:text-[var(--ink)]"
           >
             <ChevronRight size={22} strokeWidth={1.5} />
