@@ -42,12 +42,25 @@ export function Trust() {
           night. The page's own gradient is already crossing into
           morning here, so the two agree — cosmic knowledge handed on
           into human tradition. */}
+      {/* The field is masked in at the top and out at the bottom.
+          Without that it is at full strength on the register's very
+          first pixel, and the register above carries no such wash — so
+          the two meet as a hard line straight across the page. It
+          measured as a 16/255 step at the boundary, which on a flat
+          field of sky is plainly a seam, and it appeared only from
+          `sm` up because that is where this field switches on. The
+          ramps are long enough that the same amount of colour arrives
+          unnoticed. */}
       <div
         className="pointer-events-none absolute hidden sm:block inset-0 opacity-[0.55]"
         aria-hidden="true"
         style={{
           background:
             "radial-gradient(ellipse 90% 55% at 50% 0%, rgba(233,214,170,0.55), transparent 70%), radial-gradient(ellipse 70% 45% at 20% 90%, rgba(176,141,87,0.28), transparent 72%)",
+          WebkitMaskImage:
+            "linear-gradient(to bottom, transparent 0, #000 240px, #000 calc(100% - 240px), transparent 100%)",
+          maskImage:
+            "linear-gradient(to bottom, transparent 0, #000 240px, #000 calc(100% - 240px), transparent 100%)",
         }}
       />
       <div className="grain pointer-events-none absolute inset-0" aria-hidden="true" />

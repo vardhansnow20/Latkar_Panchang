@@ -74,7 +74,10 @@ export const editionPlates: EditionPlate[] = [
     title: "The Cover",
     script: "कोल्हापूर लाटकर पंचांग",
     designation: "Year 116 · Shake 1947 · 2025–26 CE",
-    note: "The cover is itself an astronomical drawing: a ruled celestial grid, stars, a crescent, and a ringed planet. It names the founders, the present compiler Meghshyam Vasant Latkar, and the price of seventy-five rupees.",
+    // The cover price is deliberately not described. It is printed on
+    // the plate and changes with each year's edition, so repeating it
+    // here would go stale the moment a new cover is photographed.
+    note: "The cover is itself an astronomical drawing: a ruled celestial grid, stars, a crescent, and a ringed planet. It names the founders and the present compiler, Meghshyam Vasant Latkar.",
   },
   {
     id: "rajavali",

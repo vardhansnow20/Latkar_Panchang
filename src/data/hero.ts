@@ -54,7 +54,11 @@ export const hero = {
   definition:
     "A Panchang is the traditional Hindu almanac that identifies each day through five essential elements — Tithi, Vara, Nakshatra, Yoga, and Karana.",
   scrollCue: "Discover our legacy",
-  cta: { label: "Explore This Year's Edition", href: "#explore" },
+  // Points at the register that actually shows the edition. It read
+  // "#explore" for a long time, which is the name of the *data* module
+  // behind that register and not the id of any section on the page, so
+  // the largest button on the site scrolled nowhere at all.
+  cta: { label: "Explore This Year's Edition", href: "#inside" },
   image: {
     src: null,
     alt: "The current edition of the Kolhapur Latkar Panchang, open to a marked page",

@@ -23,6 +23,7 @@ const CHROME = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
  */
 const ALLOWED = [
   /^Instagram$|^Facebook$|^YouTube$/,
+  /^App Store$|^Google Play$/,
   /^LATKAR$|^PANCHANG$|^SINCE 1910$/i,
   /^EN$/,
   /latkarpanchang\.com/i,

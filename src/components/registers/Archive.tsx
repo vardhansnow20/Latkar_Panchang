@@ -152,13 +152,27 @@ export function Archive() {
       />
       {/* A gallery vignette — the room's light falls off at its edges,
           which is what stops a long wall of plates reading as a flat
-          sheet of paper. */}
+          sheet of paper.
+
+          Its top and bottom are masked away. A vignette reaches full
+          strength at every edge by definition, and this one is clipped
+          to the register, so the darkest part of it sat directly
+          against the registers above and below — which carry no
+          vignette of their own. That is a hard line across a sky that
+          is meant to be continuous: measured at 55/255 where this
+          register begins and 89/255 where it ends. The falloff that
+          does the work here is the one at the sides, and that is
+          untouched. */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0"
         style={{
           background:
             "radial-gradient(ellipse 78% 58% at 50% 42%, transparent 40%, rgba(74,58,34,0.07) 72%, rgba(74,58,34,0.16) 100%)",
+          WebkitMaskImage:
+            "linear-gradient(to bottom, transparent 0, #000 260px, #000 calc(100% - 260px), transparent 100%)",
+          maskImage:
+            "linear-gradient(to bottom, transparent 0, #000 260px, #000 calc(100% - 260px), transparent 100%)",
         }}
       />
 

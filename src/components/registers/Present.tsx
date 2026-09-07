@@ -199,22 +199,39 @@ export function Almanac() {
               {c.mobileApp.body}
             </m.p>
           </Measure>
-          <m.div variants={rise}>
-            <Action href={c.mobileApp.cta.href} weight="solid">
-              {c.mobileApp.cta.label}
-            </Action>
+          {/* Store buttons appear one at a time as their URLs land; the
+              standing line takes their place until then. */}
+          <m.div variants={rise} className="flex flex-wrap items-center gap-[var(--s-3)]">
+            {c.mobileApp.stores.some((store) => store.href) ? (
+              c.mobileApp.stores
+                .filter((store) => store.href)
+                .map((store) => (
+                  <Action key={store.id} href={store.href as string} weight="solid">
+                    {store.label}
+                  </Action>
+                ))
+            ) : (
+              <p className="text-note text-[var(--ink-soft)]">{c.mobileApp.storesPending}</p>
+            )}
           </m.div>
         </m.div>
 
-        {/* The device, empty. No screenshot exists and none is
-            invented — the frame stands as a held place, lit from
-            behind so it reads as anticipation rather than omission. */}
+        {/* The device, holding the app's own opening screen. The
+            frame takes its proportions from the screenshot rather than
+            from a nominal handset, so the image sits in it exactly —
+            nothing cropped and no letterboxing. Lit from behind, which
+            is what keeps a bright screen from reading as a sticker on
+            a dark page. */}
         <m.div
           initial="hidden"
           whileInView="visible"
           viewport={viewport}
           variants={rise}
-          className="relative mx-auto mt-[var(--s-6)] w-[54%] max-w-[15rem] lg:mx-0 lg:mt-0 lg:w-[17rem] lg:shrink-0"
+          // `lg:max-w-none` is load-bearing: the phone cap applies at
+          // every breakpoint unless it is lifted, so without it the
+          // desktop width is silently clamped back to the mobile
+          // maximum and the device never grows.
+          className="relative mx-auto mt-[var(--s-6)] w-[62%] max-w-[16rem] lg:mx-0 lg:mt-0 lg:w-[21rem] lg:max-w-none lg:shrink-0"
         >
           <div
             aria-hidden="true"

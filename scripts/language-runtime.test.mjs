@@ -17,7 +17,7 @@
  *   - no text is clipped by its own box (the Devanagari failure: a
  *     taller line box inside a height chosen for Latin);
  *   - interactive elements do not land on top of one another;
- *   - the rail's current station still matches the reader's position;
+ *   - the rail still points at a register that is actually on screen;
  *   - the console stays clean.
  *
  * On mobile the switch is reached through the menu, so the test walks
@@ -127,6 +127,23 @@ const SNAPSHOT = () => {
   const station =
     document.querySelector('a[aria-current="true"][href^="#"]')?.getAttribute("href") ?? null
 
+  // Whether the station the rail is pointing at is actually on screen.
+  // This, and not "the station did not change", is the invariant worth
+  // holding: at a boundary the two registers either side both have a
+  // claim, and Marathi's extra height is enough to move which one wins
+  // — measured at 62% depth on a phone, `compilers` began at y=204 in
+  // English and y=328 in Marathi, straddling the rail's threshold. The
+  // rail was right both times. A rail pointing at a register nowhere
+  // near the screen is the actual failure.
+  const stationOnScreen = station
+    ? (() => {
+        const el = document.querySelector(station)
+        if (!el) return false
+        const r = el.getBoundingClientRect()
+        return r.bottom > 0 && r.top < vh
+      })()
+    : null
+
   // Only what can actually push the page sideways. Elements inside an
   // <svg> are excluded outright: their DOM rects are user-space
   // geometry the viewBox already clips, so a ray drawn past the edge
@@ -169,6 +186,7 @@ const SNAPSHOT = () => {
     station,
     overflow,
     clipped,
+    stationOnScreen,
     scrollY: Math.round(window.scrollY),
     docHeight: Math.round(document.documentElement.scrollHeight),
     lang: document.documentElement.lang,
@@ -425,11 +443,11 @@ for (const [label, width, height] of VIEWPORTS) {
       if (after.clipped.length)
         fail(where, `clipped text: ${after.clipped.slice(0, 3).join(" | ")}`)
 
-      // The rail's station is derived from measured section offsets, so
-      // it is the check that would catch stale measurements after the
-      // sections change height.
-      if (before.station && after.station && before.station !== after.station)
-        fail(where, `rail station changed: ${before.station} -> ${after.station}`)
+      // The rail is derived from measured section offsets, so a stale
+      // measurement after the sections change height would leave it
+      // pointing at a register that is not on screen at all.
+      if (after.station && after.stationOnScreen === false)
+        fail(where, `rail points at ${after.station}, which is off screen`)
 
       const overlaps = await page.evaluate(OVERLAPS)
       if (overlaps.length)

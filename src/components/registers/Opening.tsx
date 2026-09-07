@@ -77,9 +77,27 @@ export function Opening() {
 
   return (
     <Register id="opening" tone="night" height="full" className="grain overflow-hidden" ref={ref}>
-      {/* 1 — deep sky colour. */}
+      {/* 1 — deep sky colour.
+       *
+       * Faded out at the foot. The cloud is still at strength where
+       * the register clips it, and the register below carries no
+       * cloud, so the two met as a line straight across the page —
+       * 22/255 at its worst, on a sky that is meant to be one
+       * unbroken thing. */}
       <m.div
-        style={{ y: nebulaY, opacity: skyOpen, willChange: "transform, opacity" }}
+        style={{
+          y: nebulaY,
+          opacity: skyOpen,
+          willChange: "transform, opacity",
+          // Percentages, not pixels, and reaching zero at 90% rather
+          // than 100%. This layer is deliberately taller than the
+          // register (-inset-y-[6%]), so its own 100% sits below the
+          // edge the register clips at — a fade measured from the
+          // element's foot was still a quarter opaque where it
+          // actually got cut, and left the seam behind.
+          WebkitMaskImage: "linear-gradient(to bottom, #000 0, #000 68%, transparent 90%)",
+          maskImage: "linear-gradient(to bottom, #000 0, #000 68%, transparent 90%)",
+        }}
         className="nebula pointer-events-none absolute -inset-x-[10%] -inset-y-[6%] opacity-70"
         aria-hidden="true"
       />

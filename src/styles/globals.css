@@ -379,13 +379,34 @@ html[lang="mr"] {
   }
 
   /* Film grain over the sky. Without it, wide gradients band visibly
-     on 8-bit displays; with it, they read as photographed. */
+     on 8-bit displays; with it, they read as photographed.
+
+     Faded at the top and bottom, because it is applied per register
+     while the sky it sits on is continuous. At full strength to the
+     register's edge, the texture simply stops against a neighbour
+     that has none, and the change in the noise floor reads as a line
+     drawn across the page — it measured 15/255, the largest remaining
+     seam once the coloured washes were dealt with. */
   .grain::before {
     content: "";
     position: absolute;
     inset: 0;
     pointer-events: none;
     opacity: 0.055;
+    -webkit-mask-image: linear-gradient(
+      to bottom,
+      transparent 0,
+      #000 200px,
+      #000 calc(100% - 200px),
+      transparent 100%
+    );
+    mask-image: linear-gradient(
+      to bottom,
+      transparent 0,
+      #000 200px,
+      #000 calc(100% - 200px),
+      transparent 100%
+    );
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   }
 
