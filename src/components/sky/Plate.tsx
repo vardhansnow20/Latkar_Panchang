@@ -246,6 +246,27 @@ export function Plate({
       setNear(true)
       return
     }
+
+    /**
+     * What to watch: this plate, or the gallery holding it.
+     *
+     * A plate parked off the right-hand end of a side-scrolling
+     * gallery is clipped by that gallery to nothing, and a clipped
+     * element never intersects anything however far the root margin is
+     * widened — so those plates were never requested until the visitor
+     * scrolled the gallery, and then sat blank while they loaded. The
+     * whole strip is small enough to be worth fetching together, so the
+     * scroller itself is the thing observed and every plate in it
+     * arrives before it is reached.
+     */
+    let target: HTMLElement = el
+    for (let node = el.parentElement; node; node = node.parentElement) {
+      const overflowX = getComputedStyle(node).overflowX
+      if (overflowX === "auto" || overflowX === "scroll") {
+        target = node
+        break
+      }
+    }
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries.some((entry) => entry.isIntersecting)) {
@@ -253,11 +274,15 @@ export function Plate({
           observer.disconnect()
         }
       },
-      // A screen of warning, so a plate is already there by the time
-      // it is scrolled to rather than arriving underneath the reader.
-      { rootMargin: "100% 0px" }
+      // A screen of warning on every side, so a plate is already there
+      // by the time it is scrolled to rather than arriving underneath
+      // the reader. Horizontal margin matters as much as vertical:
+      // several plates live in side-scrolling galleries, and with the
+      // margin on the vertical axis alone the ones parked off the
+      // right edge were never requested at all.
+      { rootMargin: "100%" }
     )
-    observer.observe(el)
+    observer.observe(target)
     return () => observer.disconnect()
   }, [src, near])
 

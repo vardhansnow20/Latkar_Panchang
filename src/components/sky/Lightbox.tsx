@@ -113,7 +113,11 @@ export function Lightbox({
       </div>
 
       <div className="flex items-center justify-between gap-[var(--s-4)]">
-        <p className="max-w-[52ch] text-note text-[var(--ink-soft)]">{item.description}</p>
+        {/* Reading size, not label size. This is the only description
+            of the photograph a visitor gets, and it was set at 13px —
+            fine for a caption glanced past, too small for the sentence
+            that explains what is being looked at. */}
+        <p className="max-w-[52ch] text-body text-[var(--ink-soft)]">{item.description}</p>
         <div className="flex shrink-0 items-center gap-[var(--s-2)]">
           <button
             type="button"
